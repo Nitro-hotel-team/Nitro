@@ -58,12 +58,12 @@ export const CustomerLayout: React.FC = () => {
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1">
               <MapPin className="w-3.5 h-3.5 text-[#C9A227]" />
-              <span className="hidden sm:inline">24 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh</span>
-              <span className="sm:hidden">24 Nguyễn Huệ, Q.1, TP.HCM</span>
+              <span className="hidden sm:inline">{t('brand.address')}</span>
+              <span className="sm:hidden">{isEn ? '24 Nguyen Hue Blvd, Dist 1, HCMC' : '24 Nguyễn Huệ, Q.1, TP.HCM'}</span>
             </span>
             <span className="hidden md:flex items-center gap-1">
               <Phone className="w-3.5 h-3.5 text-[#C9A227]" />
-              <span>Hotline: 1900 1234</span>
+              <span>{t('brand.hotline')}</span>
             </span>
           </div>
 
@@ -103,7 +103,7 @@ export const CustomerLayout: React.FC = () => {
                 className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[11px] font-medium hover:bg-amber-500/30 transition cursor-pointer"
               >
                 <ShieldCheck className="w-3 h-3" />
-                Vào cổng nhân viên &rarr;
+                {t('footer.staffPortalActive')}
               </button>
             ) : (
               <Link
@@ -111,7 +111,7 @@ export const CustomerLayout: React.FC = () => {
                 className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-[11px] font-medium transition"
               >
                 <ShieldCheck className="w-3 h-3 text-[#C9A227]" />
-                Cổng nhân viên &rarr;
+                {t('footer.staffPortal')}
               </Link>
             )}
           </div>
@@ -237,7 +237,7 @@ export const CustomerLayout: React.FC = () => {
                         className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100"
                       >
                         <ShieldCheck className="w-4 h-4 text-amber-600" />
-                        Giao diện Quản trị / Lễ tân
+                        {t('footer.staffPortalTitle')}
                       </Link>
                     )}
 
@@ -272,7 +272,7 @@ export const CustomerLayout: React.FC = () => {
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition"
-              aria-label="Mở menu điều hướng"
+              aria-label={isEn ? "Open navigation menu" : "Mở menu điều hướng"}
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -319,7 +319,7 @@ export const CustomerLayout: React.FC = () => {
                   className="w-full py-2 bg-amber-50 border border-amber-200 text-amber-800 font-bold rounded-lg text-center flex items-center justify-center gap-1.5 hover:bg-amber-100 transition text-sm"
                 >
                   <ShieldCheck className="w-4 h-4 text-amber-600" />
-                  Cổng Quản trị / Lễ tân
+                  {t('footer.staffPortalTitle')}
                 </Link>
               )}
 
@@ -338,7 +338,7 @@ export const CustomerLayout: React.FC = () => {
 
               {/* Language switcher inside mobile menu */}
               <div className="flex items-center justify-between pt-2 px-1 text-xs text-slate-500">
-                <span>Ngôn ngữ / Language:</span>
+                <span>{t('footer.selectLanguage')}</span>
                 <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg">
                   <button
                     type="button"
@@ -381,38 +381,37 @@ export const CustomerLayout: React.FC = () => {
                 <span className="font-bold text-xl text-white">NITRO GRAND HOTEL</span>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed mb-4">
-                Khách sạn 4 sao đẳng cấp tọa lạc tại vị trí vàng 24 Nguyễn Huệ,
-                trung tâm Quận 1. Không gian nghỉ dưỡng sang trọng, dịch vụ chuẩn quốc tế.
+                {t('footer.desc')}
               </p>
               <div className="text-xs text-[#C9A227] font-semibold">
-                ⭐️⭐️⭐️⭐️ 4-Star Certified Luxury
+                {t('footer.certified')}
               </div>
             </div>
 
             {/* Col 2: Navigation */}
             <div>
               <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-3">
-                {t('nav.rooms')}
+                {t('footer.popularRooms')}
               </h4>
               <ul className="space-y-2 text-xs text-slate-400">
                 <li>
                   <Link to="/rooms" className="hover:text-[#C9A227] transition">
-                    Deluxe City View (Bán chạy)
+                    {t('footer.room1')}
                   </Link>
                 </li>
                 <li>
                   <Link to="/rooms" className="hover:text-[#C9A227] transition">
-                    Family Suite (Gia đình)
+                    {t('footer.room2')}
                   </Link>
                 </li>
                 <li>
                   <Link to="/rooms" className="hover:text-[#C9A227] transition">
-                    Executive Suite (Doanh nhân)
+                    {t('footer.room3')}
                   </Link>
                 </li>
                 <li>
                   <Link to="/rooms" className="hover:text-[#C9A227] transition">
-                    Presidential Suite (Tổng thống)
+                    {t('footer.room4')}
                   </Link>
                 </li>
               </ul>
@@ -421,34 +420,34 @@ export const CustomerLayout: React.FC = () => {
             {/* Col 3: Policies & Security */}
             <div>
               <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-3">
-                Chính sách &amp; An toàn
+                {t('footer.policiesTitle')}
               </h4>
               <ul className="space-y-2 text-xs text-slate-400">
-                <li>Nhận phòng: 14:00 | Trả phòng: 12:00</li>
-                <li>Hủy miễn phí trước 48h</li>
-                <li>Bảo mật thanh toán 256-bit SSL</li>
-                <li>Không lưu trữ dữ liệu thẻ thô</li>
-                <li>Hỗ trợ khách hàng 24/7</li>
+                <li>{t('footer.policy1')}</li>
+                <li>{t('footer.policy2')}</li>
+                <li>{t('footer.policy3')}</li>
+                <li>{t('footer.policy4')}</li>
+                <li>{t('footer.policy5')}</li>
               </ul>
             </div>
 
             {/* Col 4: Contact & Location */}
             <div>
               <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-3">
-                Liên hệ đặt phòng
+                {t('footer.contactTitle')}
               </h4>
               <div className="space-y-2.5 text-xs text-slate-400">
                 <div className="flex items-start gap-2">
                   <MapPin className="w-4 h-4 text-[#C9A227] shrink-0 mt-0.5" />
-                  <span>24 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh</span>
+                  <span>{t('footer.address')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Phone className="w-4 h-4 text-[#C9A227] shrink-0" />
-                  <span>1900 1234 • 028 3822 9999</span>
+                  <span>{t('brand.phone')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Mail className="w-4 h-4 text-[#C9A227] shrink-0" />
-                  <span>booking@nitrohotel.vn</span>
+                  <span>{t('brand.email')}</span>
                 </div>
               </div>
             </div>
@@ -456,15 +455,15 @@ export const CustomerLayout: React.FC = () => {
 
           <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-3">
             <div>
-              © 2026 Nitro Grand Hotel. Dự án Nhóm 7 — Nitro Hotel Booking System.
+              {t('footer.copyright')}
             </div>
             <div className="flex flex-wrap gap-4 items-center">
-              <span>Điều khoản sử dụng</span>
+              <span>{t('footer.terms')}</span>
               <span>•</span>
-              <span>Chính sách quyền riêng tư</span>
+              <span>{t('footer.privacy')}</span>
               <span>•</span>
               <Link to="/smoke-test" className="text-[#C9A227] hover:underline font-medium">
-                Kiểm định Smoke Test (TASK-15) →
+                {t('footer.smokeTest')}
               </Link>
             </div>
           </div>

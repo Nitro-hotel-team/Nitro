@@ -139,7 +139,7 @@ export const RegisterPage: React.FC = () => {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Tối thiểu 8 ký tự"
+                placeholder={t('profile.newPasswordPlaceholder')}
                 required
                 minLength={6}
                 className="w-full text-xs pl-9 pr-10 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary-600 focus:outline-none"
@@ -163,7 +163,7 @@ export const RegisterPage: React.FC = () => {
                 className="mt-0.5 rounded text-primary-600 focus:ring-primary-600"
               />
               <span>
-                Tôi đồng ý với Điều khoản dịch vụ và Chính sách bảo mật của Nitro Grand Hotel.
+                {t('auth.agreeTermsRegister')}
               </span>
             </label>
           </div>
@@ -178,7 +178,7 @@ export const RegisterPage: React.FC = () => {
             {isSubmitting ? (
               <span className="flex items-center justify-center gap-2">
                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Đang xử lý đăng ký...
+                {t('auth.processingRegister')}
               </span>
             ) : (
               t('auth.registerButton')

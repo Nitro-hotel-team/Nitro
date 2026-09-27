@@ -84,7 +84,7 @@ export const BookingStep3Page: React.FC = () => {
             onClick={handleCopyCode}
             icon={copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
           >
-            {copied ? 'Đã sao chép' : 'Sao chép'}
+            {copied ? t('bookingStep3.copied') : t('bookingStep3.copy')}
           </Button>
         </div>
 
@@ -117,10 +117,10 @@ export const BookingStep3Page: React.FC = () => {
             </div>
             <div className="text-xs font-bold text-[#0F172A] flex items-center gap-1.5">
               <QrCode className="w-4 h-4 text-[#1F5AA6]" />
-              Mã QR nhận phòng nhanh (Fast Check-in)
+              {t('bookingStep3.qrTitle')}
             </div>
             <p className="text-[11px] text-[#475569] mt-0.5">
-              Xuất trình mã này tại quầy lễ tân tầng 1 để nhận thẻ phòng tức thì
+              {t('bookingStep3.qrDesc')}
             </p>
           </div>
         </div>
@@ -128,35 +128,40 @@ export const BookingStep3Page: React.FC = () => {
         {/* Booking Recap Details */}
         <div className="bg-slate-50 rounded-2xl p-5 text-left text-xs space-y-2.5 max-w-md mx-auto border border-slate-200">
           <div className="flex justify-between">
-            <span className="text-[#475569]">Khách sạn:</span>
+            <span className="text-[#475569]">{t('bookingStep3.hotelLabel')}</span>
             <span className="font-bold text-[#0F172A]">Nitro Grand Hotel (24 Nguyễn Huệ, Q.1)</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-[#475569]">Hạng phòng:</span>
+            <span className="text-[#475569]">{t('bookingStep3.roomTypeLabel')}</span>
             <span className="font-bold text-[#1F5AA6]">
               {draftBooking?.roomTypeName || 'Deluxe City View'}
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-[#475569]">Thời gian:</span>
+            <span className="text-[#475569]">{t('bookingStep3.stayPeriodLabel')}</span>
             <span className="font-bold text-[#0F172A]">
               {formatDate(draftBooking?.checkInDate || '')} &rarr;{' '}
-              {formatDate(draftBooking?.checkOutDate || '')} ({draftBooking?.nights || 1} đêm)
+              {formatDate(draftBooking?.checkOutDate || '')} ({draftBooking?.nights || 1} {t('search.nights')})
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-[#475569]">Khách lưu trú:</span>
+            <span className="text-[#475569]">{t('bookingStep3.guestLabel')}</span>
             <span className="font-bold text-[#0F172A]">
               {draftBooking?.guestName || 'Nguyễn Văn An'}
             </span>
           </div>
           <div className="flex justify-between pt-2 border-t border-slate-200 text-sm font-bold">
-            <span className="text-[#0F172A]">Đã thanh toán:</span>
+            <span className="text-[#0F172A]">{t('bookingStep3.paidAmountLabel')}</span>
             <span className="text-emerald-700 tabular-nums">
               {formatCurrency(draftBooking?.totalAmount || 1638000, language)}
             </span>
           </div>
         </div>
+
+        {/* E-Invoice Notice */}
+        <p className="text-[11px] text-[#64748B] max-w-md mx-auto italic">
+          {t('bookingStep3.invoiceNotice')}
+        </p>
 
         {/* Action Buttons */}
         <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -166,7 +171,7 @@ export const BookingStep3Page: React.FC = () => {
             onClick={() => navigate('/my-bookings')}
             className="w-full sm:w-auto"
           >
-            Xem danh sách đặt phòng của tôi
+            {t('bookingStep3.viewMyBookingsBtn')}
           </Button>
           <Button
             variant="outline"
@@ -175,7 +180,7 @@ export const BookingStep3Page: React.FC = () => {
             icon={<Home className="w-4 h-4" />}
             className="w-full sm:w-auto"
           >
-            Về trang chủ
+            {t('bookingStep3.backHomeBtn')}
           </Button>
           <Button
             variant="ghost"
@@ -184,7 +189,7 @@ export const BookingStep3Page: React.FC = () => {
             icon={<Printer className="w-4 h-4" />}
             className="w-full sm:w-auto text-slate-600"
           >
-            In xác nhận
+            {t('bookingStep3.printBtn')}
           </Button>
         </div>
       </div>

@@ -31,11 +31,14 @@ import {
   ShieldCheck,
   Terminal,
   Zap,
+  Calendar as CalendarIcon,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../components/common/Button';
+import { DateRangePicker } from '../components/common/DateRangePicker';
 import { Drawer } from '../components/common/Drawer';
+import { GuestCounter } from '../components/common/GuestCounter';
 import { Modal } from '../components/common/Modal';
 import { StatCard } from '../components/common/StatCard';
 import { EmptyState, ErrorState, Skeleton } from '../components/common/StateViews';
@@ -53,6 +56,23 @@ export const SmokeTestPage: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [btnLoading, setBtnLoading] = useState(false);
+
+  // TASK-17: DateRangePicker & GuestCounter Playground States
+  const [testStartDate, setTestStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().slice(0, 10);
+  });
+  const [testEndDate, setTestEndDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 3);
+    return d.toISOString().slice(0, 10);
+  });
+  const [testNights, setTestNights] = useState(2);
+  const [testAdults, setTestAdults] = useState(2);
+  const [testChildren, setTestChildren] = useState(1);
+  const [testRooms, setTestRooms] = useState(1);
+  const [testInfants, setTestInfants] = useState(0);
 
   // API Latency Ping States
   const [pingStatus, setPingStatus] = useState<Record<string, { ok: boolean; time: number; note: string }>>({});
@@ -266,6 +286,55 @@ export const SmokeTestPage: React.FC = () => {
                 <Button variant="outline" size="sm" onClick={() => setDrawerOpen(true)}>
                   Bật Thử Drawer
                 </Button>
+              </div>
+            </div>
+
+            {/* 5. DateRangePicker & GuestCounter (TASK-17) */}
+            <div className="space-y-3 pt-3 border-t border-slate-700/60">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-amber-400 block">
+                  5. Bộ Chọn Ngày &amp; Đếm Khách (TASK-17 Playground):
+                </span>
+                <span className="text-[10px] font-mono bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded border border-amber-500/30">
+                  {testNights} đêm • {testAdults + testChildren + testInfants} khách
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-900/70 p-3 rounded-2xl border border-slate-700/60">
+                <div>
+                  <span className="text-[11px] font-semibold text-slate-400 mb-1 block">DateRangePicker.tsx:</span>
+                  <DateRangePicker
+                    startDate={testStartDate}
+                    endDate={testEndDate}
+                    onChange={(s, e, n) => {
+                      setTestStartDate(s);
+                      setTestEndDate(e);
+                      setTestNights(n);
+                    }}
+                  />
+                </div>
+                <div>
+                  <span className="text-[11px] font-semibold text-slate-400 mb-1 block">GuestCounter.tsx:</span>
+                  <GuestCounter
+                    adults={testAdults}
+                    childrenCount={testChildren}
+                    rooms={testRooms}
+                    infants={testInfants}
+                    onChange={(a, c, r, inf) => {
+                      setTestAdults(a);
+                      setTestChildren(c);
+                      setTestRooms(r);
+                      if (typeof inf === 'number') setTestInfants(inf);
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="p-2.5 rounded-xl bg-slate-900/50 border border-slate-800 text-[11px] text-slate-300 flex flex-wrap items-center justify-between gap-2">
+                <span>
+                  Check-in: <strong className="text-white">{testStartDate}</strong> &rarr; Check-out: <strong className="text-white">{testEndDate}</strong> ({testNights} đêm)
+                </span>
+                <span>
+                  Lưu trú: <strong className="text-white">{testAdults} Người lớn</strong>, <strong className="text-white">{testChildren} Trẻ em</strong>{testInfants > 0 ? `, ${testInfants} Em bé` : ''} ({testRooms} phòng)
+                </span>
               </div>
             </div>
           </div>

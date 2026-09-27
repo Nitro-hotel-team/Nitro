@@ -27,7 +27,8 @@ import { UserRole } from '../../types';
 
 export const LoginPage: React.FC = () => {
   const { t } = useTranslation();
-  const { login } = useApp();
+  const { login, language } = useApp();
+  const isEn = language === 'en';
   const navigate = useNavigate();
 
   const [emailOrPhone, setEmailOrPhone] = useState('khachhang@nitrohotel.vn');
@@ -46,7 +47,7 @@ export const LoginPage: React.FC = () => {
     setIsSubmitting(false);
 
     if (!res.success) {
-      setErrorMsg(res.error || 'Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin.');
+      setErrorMsg(res.error || (isEn ? 'Login failed. Please verify credentials.' : 'Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin.'));
       return;
     }
 
@@ -101,9 +102,13 @@ export const LoginPage: React.FC = () => {
 
           <div className="relative z-10 space-y-2 text-xs text-slate-300">
             <p className="italic">
-              "Trải nghiệm lưu trú chuẩn mực quốc tế ngay trung tâm phố đi bộ Nguyễn Huệ, Quận 1."
+              {isEn
+                ? '"World-class hospitality right on Nguyen Hue walking street, District 1."'
+                : '"Trải nghiệm lưu trú chuẩn mực quốc tế ngay trung tâm phố đi bộ Nguyễn Huệ, Quận 1."'}
             </p>
-            <div className="text-[11px] text-[#C9A227]">Hotline hỗ trợ: 1900 1234</div>
+            <div className="text-[11px] text-[#C9A227]">
+              {isEn ? 'Support Hotline: 1900 1234' : 'Hotline hỗ trợ: 1900 1234'}
+            </div>
           </div>
         </div>
 
@@ -182,14 +187,14 @@ export const LoginPage: React.FC = () => {
               disabled={isSubmitting}
               className="w-full bg-[#1F5AA6] hover:bg-[#184A8A] font-bold"
             >
-              {isSubmitting ? 'Đang xác thực...' : t('auth.loginButton')}
+              {isSubmitting ? t('auth.authenticating') : t('auth.loginButton')}
             </Button>
           </form>
 {/* ======================================================Tài Khoản Mẫu======================================== */}
           {/* Quick Mock Accounts for Testing */}
           <div className="pt-4 border-t border-[#E2E8F0]">
             <span className="block text-center text-[11px] uppercase font-bold text-slate-400 tracking-wider mb-2">
-              Tài khoản mẫu để kiểm thử phân quyền:
+              {t('auth.demoAccountsTitle')}
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
               <button
@@ -197,7 +202,7 @@ export const LoginPage: React.FC = () => {
                 onClick={() => handleSelectAccount('khachhang@nitrohotel.vn')}
                 className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-left transition cursor-pointer"
               >
-                <div className="font-semibold text-[#0F172A]">Khách hàng</div>
+                <div className="font-semibold text-[#0F172A]">{t('role.CUSTOMER')}</div>
                 <div className="text-[10px] text-slate-500 truncate">khachhang@nitrohotel.vn</div>
               </button>
               <button
@@ -205,7 +210,7 @@ export const LoginPage: React.FC = () => {
                 onClick={() => handleSelectAccount('letan@nitrohotel.vn')}
                 className="p-2 rounded-lg border border-blue-200 bg-blue-50/50 hover:bg-blue-100/50 text-[#1F5AA6] text-left transition cursor-pointer"
               >
-                <div className="font-bold">Lễ tân (Front Desk)</div>
+                <div className="font-bold">{t('role.FRONT_DESK')} (Front Desk)</div>
                 <div className="text-[10px] text-blue-600 truncate">letan@nitrohotel.vn</div>
               </button>
               <button
@@ -213,7 +218,7 @@ export const LoginPage: React.FC = () => {
                 onClick={() => handleSelectAccount('quanly@nitrohotel.vn')}
                 className="p-2 rounded-lg border border-purple-200 bg-purple-50/50 hover:bg-purple-100/50 text-purple-700 text-left transition cursor-pointer"
               >
-                <div className="font-bold">Quản lý (Manager)</div>
+                <div className="font-bold">{t('role.MANAGER')} (Manager)</div>
                 <div className="text-[10px] text-purple-600 truncate">quanly@nitrohotel.vn</div>
               </button>
               <button
@@ -221,12 +226,12 @@ export const LoginPage: React.FC = () => {
                 onClick={() => handleSelectAccount('admin@nitrohotel.vn')}
                 className="p-2 rounded-lg border border-amber-200 bg-amber-50/50 hover:bg-amber-100/50 text-amber-800 text-left transition cursor-pointer"
               >
-                <div className="font-bold">Quản trị viên (Admin)</div>
+                <div className="font-bold">{t('role.ADMIN')} (Admin)</div>
                 <div className="text-[10px] text-amber-700 truncate">admin@nitrohotel.vn</div>
               </button>
             </div>
             <p className="text-[10px] text-center text-slate-400 mt-2">
-              Nhấn vào tài khoản để điền Email &amp; Mật khẩu mẫu (password123), sau đó nhấn Đăng nhập
+              {t('auth.demoAccountsDesc')}
             </p>
           </div>
 {/* ============================================================================================================================ */}

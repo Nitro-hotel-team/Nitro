@@ -92,6 +92,9 @@ export interface ExtraServiceItem {
   nameEn?: string;
   price: number;
   quantity?: number;
+  unit?: string;
+  unitEn?: string;
+  calculationType?: 'PER_ROOM' | 'PER_GUEST' | 'PER_NIGHT' | 'PER_TIME';
 }
 
 export interface Booking {
@@ -112,6 +115,7 @@ export interface Booking {
   nights: number;
   adults: number;
   children: number;
+  roomsCount?: number;
   totalAmount: number;
   paidAmount: number;
   paymentStatus?: 'PAID' | 'UNPAID' | 'PARTIAL';
@@ -121,6 +125,10 @@ export interface Booking {
   notes?: string;
   specialRequests?: string;
   extraServices?: ExtraServiceItem[];
+  discountCode?: string;
+  discountAmount?: number;
+  serviceFee?: number;
+  vatAmount?: number;
   paymentMethod?: PaymentMethod;
   transactionId?: string;
   cancellationReason?: string;
@@ -164,6 +172,7 @@ export interface HotelService {
   unitEn?: string;
   category?: string;
   description: string;
+  descriptionEn?: string;
   status?: 'ACTIVE' | 'INACTIVE';
   isActive?: boolean;
   icon?: string;
