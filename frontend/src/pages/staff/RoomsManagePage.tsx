@@ -26,12 +26,14 @@ import {
   Search,
   Sparkles,
   Wrench,
+  Trash2,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../../components/common/Button';
+import { Modal } from '../../components/common/Modal';
 import { StatusBadge } from '../../components/common/StatusBadge';
 import { roomService } from '../../services/api';
-import { Room, RoomStatus } from '../../types';
+import { Room, RoomStatus, RoomType } from '../../types';
 
 export const RoomsManagePage: React.FC = () => {
   const { t } = useTranslation();
@@ -40,15 +42,93 @@ export const RoomsManagePage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<RoomStatus | 'ALL'>('ALL');
   const [search, setSearch] = useState('');
 
+  const [roomTypes, setRoomTypes] = useState<RoomType[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingRoom, setEditingRoom] = useState<Room | null>(null);
+
+  // Form states
+  const [roomNumber, setRoomNumber] = useState('');
+  const [floor, setFloor] = useState(1);
+  const [roomTypeId, setRoomTypeId] = useState<string>('');
+
+  const loadData = async () => {
+    try {
+      const [rData, rtData] = await Promise.all([
+        roomService.getRooms(),
+        roomService.getRoomTypes()
+      ]);
+      setRooms(rData);
+      setRoomTypes(rtData);
+      if (rtData.length > 0) setRoomTypeId(rtData[0].id);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   useEffect(() => {
-    roomService.getRooms().then(setRooms);
+    loadData();
   }, []);
 
   const handleToggleClean = async (room: Room) => {
     const updatedStatus: RoomStatus = room.status === 'CLEANING' ? 'AVAILABLE' : 'CLEANING';
     await roomService.updateRoomStatus(room.id, updatedStatus);
-    const refreshed = await roomService.getRooms();
-    setRooms(refreshed);
+    loadData();
+  };
+
+  const handleOpenAdd = () => {
+    setEditingRoom(null);
+    setRoomNumber('');
+    setFloor(1);
+    if (roomTypes.length > 0) setRoomTypeId(roomTypes[0].id);
+    setModalOpen(true);
+  };
+
+  const handleOpenEdit = (r: Room) => {
+    setEditingRoom(r);
+    setRoomNumber(r.roomNumber || r.number || '');
+    setFloor(r.floor);
+    setRoomTypeId(r.roomTypeId || '');
+    setModalOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (floor < 1) {
+      return alert('Số tầng không hợp lệ (phải lớn hơn hoặc bằng 1)');
+    }
+    
+    try {
+      if (editingRoom) {
+        await roomService.updateRoom(editingRoom.id, {
+          number: roomNumber,
+          floor,
+          roomTypeId
+        });
+        alert('Sửa phòng thành công!');
+      } else {
+        await roomService.createRoom({
+          number: roomNumber,
+          floor,
+          roomTypeId
+        });
+        alert('Thêm phòng thành công!');
+      }
+      setModalOpen(false);
+      loadData();
+    } catch (error: any) {
+      alert(error.message || 'Lỗi khi lưu phòng');
+    }
+  };
+
+  const handleDelete = async (r: Room) => {
+    if (window.confirm(`Bạn có chắc muốn xóa phòng ${r.roomNumber || r.number}?`)) {
+      try {
+        await roomService.deleteRoom(r.id);
+        alert('Xóa phòng thành công!');
+        loadData();
+      } catch (error: any) {
+        alert(error.message || 'Không thể xóa phòng');
+      }
+    }
   };
 
   const filtered = rooms.filter((r) => {
@@ -72,7 +152,7 @@ export const RoomsManagePage: React.FC = () => {
         <Button
           variant="gold"
           size="sm"
-          onClick={() => {}}
+          onClick={handleOpenAdd}
           icon={<PlusCircle className="w-4 h-4" />}
           className="font-bold"
         >
@@ -143,7 +223,7 @@ export const RoomsManagePage: React.FC = () => {
               {filtered.map((room) => (
                 <tr key={room.id} className="hover:bg-slate-50/80 transition">
                   <td className="py-3 px-4 font-mono font-extrabold text-sm text-[#0F172A]">
-                    {room.roomNumber}
+                    {room.number || room.roomNumber}
                   </td>
                   <td className="py-3 px-4 font-bold text-slate-600">Tầng {room.floor}</td>
                   <td className="py-3 px-4">
@@ -168,14 +248,24 @@ export const RoomsManagePage: React.FC = () => {
                   <td className="py-3 px-4 text-slate-700 font-medium">
                     {room.guestName || '—'}
                   </td>
-                  <td className="py-3 px-4 text-right">
+                  <td className="py-3 px-4 text-right flex justify-end gap-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => {}}
+                      onClick={() => handleOpenEdit(room)}
                       className="h-7 text-xs px-2"
+                      icon={<Edit2 className="w-3.5 h-3.5" />}
                     >
-                      Chi tiết
+                      Sửa
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(room)}
+                      className="h-7 text-xs px-2 text-rose-600 border-rose-200 hover:bg-rose-50"
+                      icon={<Trash2 className="w-3.5 h-3.5" />}
+                    >
+                      Xóa
                     </Button>
                   </td>
                 </tr>
@@ -184,6 +274,53 @@ export const RoomsManagePage: React.FC = () => {
           </table>
         </div>
       </div>
+
+      <Modal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={editingRoom ? 'Sửa thông tin phòng' : 'Thêm phòng vật lý mới'}
+        footer={
+          <div className="flex justify-end gap-2 w-full">
+            <Button variant="outline" size="sm" onClick={() => setModalOpen(false)}>Hủy</Button>
+            <Button variant="primary" size="sm" onClick={handleSave}>Lưu thông tin</Button>
+          </div>
+        }
+      >
+        <div className="space-y-4 text-xs">
+          <div>
+            <label className="block font-bold mb-1 text-[#0F172A]">Số phòng:</label>
+            <input
+              type="text"
+              value={roomNumber}
+              onChange={(e) => setRoomNumber(e.target.value)}
+              className="w-full p-2.5 rounded-lg border border-[#E2E8F0]"
+              placeholder="VD: 101, 204..."
+            />
+          </div>
+          <div>
+            <label className="block font-bold mb-1 text-[#0F172A]">Tầng:</label>
+            <input
+              type="number"
+              min="1"
+              value={floor}
+              onChange={(e) => setFloor(Number(e.target.value))}
+              className="w-full p-2.5 rounded-lg border border-[#E2E8F0]"
+            />
+          </div>
+          <div>
+            <label className="block font-bold mb-1 text-[#0F172A]">Hạng phòng:</label>
+            <select
+              value={roomTypeId}
+              onChange={(e) => setRoomTypeId(e.target.value)}
+              className="w-full p-2.5 rounded-lg border border-[#E2E8F0] bg-white"
+            >
+              {roomTypes.map((rt) => (
+                <option key={rt.id} value={rt.id}>{rt.name} ({rt.code})</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

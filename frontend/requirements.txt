@@ -1,0 +1,48 @@
+# ============================================================
+# Frontend Dependencies - Nitro Hotel Management System
+# React + Vite + TypeScript
+# ============================================================
+
+# --- Core Framework ---
+react@^19.0.1
+react-dom@^19.0.1
+vite@^8.3.0
+@vitejs/plugin-react@^6.1.1
+
+# --- Routing ---
+react-router-dom@^7.18.4
+
+# --- Styling ---
+tailwindcss@^4.3.3
+@tailwindcss/vite@^4.3.3
+autoprefixer@^10.4.21
+
+# --- Animation ---
+motion@^12.23.24
+
+# --- Icons ---
+lucide-react@^0.546.0
+
+# --- Charts / Biểu đồ ---
+recharts@^3.10.1
+
+# --- Đa ngôn ngữ (i18n) ---
+i18next@^26.4.2
+react-i18next@^17.0.14
+
+# --- AI Integration ---
+@google/genai@^2.4.0
+
+# --- Server / Utilities ---
+express@^4.21.2
+dotenv@^17.2.3
+
+# --- DevDependencies ---
+typescript@^7.0.2
+@types/react@^19.3.0
+@types/react-dom@^19.3.0
+@types/node@^22.14.0
+@types/express@^4.17.21
+esbuild@^0.25.0
+tsx@^4.21.0
+python-multipart@0.0.9

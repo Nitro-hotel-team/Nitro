@@ -92,6 +92,20 @@ export const BookingStep2Page: React.FC = () => {
       badge: 'Ưu đãi 5%',
       icon: <Wallet className="w-6 h-6 text-blue-500" />,
     },
+    {
+      id: 'BANK_TRANSFER',
+      name: 'Chuyển khoản ngân hàng',
+      description: 'Thanh toán bằng hình thức chuyển khoản qua ngân hàng',
+      badge: 'An toàn',
+      icon: <CheckCircle2 className="w-6 h-6 text-indigo-600" />,
+    },
+    {
+      id: 'CASH',
+      name: 'Tiền mặt tại quầy',
+      description: 'Thanh toán trực tiếp tại Lễ tân khi nhận phòng',
+      badge: 'Linh hoạt',
+      icon: <CheckCircle2 className="w-6 h-6 text-emerald-600" />,
+    },
   ];
 
   const handleProcessPayment = async () => {
@@ -109,26 +123,65 @@ export const BookingStep2Page: React.FC = () => {
     setIsProcessing(true);
 
     try {
-      // Simulate real gateway API call through bookingService
-      const newBooking = await bookingService.createBooking({
-        ...draftBooking,
+      // Chuẩn bị payload đúng với BookingCreate schema của backend
+      const bookingPayload: Record<string, any> = {
+        roomTypeId: draftBooking.roomTypeId,
+        roomNumber: draftBooking.roomNumber || undefined,
+        checkInDate: draftBooking.checkInDate,
+        checkOutDate: draftBooking.checkOutDate,
+        nights: draftBooking.nights || 1,
+        adults: draftBooking.adults || 1,
+        children: draftBooking.children || 0,
+        guestName: draftBooking.guestName,
+        guestPhone: draftBooking.guestPhone,
+        guestEmail: draftBooking.guestEmail || undefined,
+        guestIdCard: draftBooking.guestIdCard || undefined,
+        totalAmount: draftBooking.totalAmount || 0,
+        paidAmount: 0,
         paymentMethod: selectedMethod,
-        paidAmount: draftBooking.totalAmount || 0,
-        paymentStatus: 'PAID',
-        status: 'CONFIRMED',
-      });
+        source: 'WEB',
+        specialRequests: draftBooking.specialRequests || undefined,
+        // Chuyển đổi extraServices: frontend dùng `id`, backend cần `serviceId`
+        extraServices: (draftBooking.extraServices || []).map((svc) => ({
+          serviceId: svc.id,
+          name: svc.name,
+          price: svc.price,
+          quantity: svc.quantity || 1,
+        })),
+      };
 
-      // Save into draft for step 3 confirmation view
+      const newBooking = await bookingService.createBooking(bookingPayload as any);
+
       setDraftBooking({
         ...draftBooking,
         bookingCode: newBooking.bookingCode,
-        totalAmount: newBooking.totalAmount,
-        paidAmount: newBooking.paidAmount,
+        id: newBooking.id,
+        paymentMethod: selectedMethod,
       });
+
+      if (selectedMethod === 'VNPAY') {
+        const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000').trim();
+        const res = await fetch(`${API_URL}/api/payments/create_vnpay_url`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            booking_id: parseInt(newBooking.id, 10),
+            amount: newBooking.totalAmount
+          })
+        });
+        
+        if (!res.ok) throw new Error('Lỗi kết nối cổng thanh toán VNPay');
+        
+        const data = await res.json();
+        // Redirect to VNPay
+        window.location.href = data.payment_url;
+        return; 
+      }
 
       setIsProcessing(false);
       navigate('/booking/step-3');
     } catch (err: any) {
+      console.error('Lỗi khi thanh toán:', err);
       setIsProcessing(false);
       setPaymentError(err.message || 'Thanh toán không thành công. Vui lòng thử lại.');
     }

@@ -45,10 +45,33 @@ export const RoomTypesManagePage: React.FC = () => {
   const [capacityChildren, setCapacityChildren] = useState(1);
   const [area, setArea] = useState(30);
   const [description, setDescription] = useState('');
+  const [image, setImage] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+
+  const loadData = async () => {
+    try {
+      const data = await roomService.getRoomTypes();
+      setRoomTypes(data);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   useEffect(() => {
-    roomService.getRoomTypes().then(setRoomTypes);
+    loadData();
   }, []);
+
+  const handleOpenAdd = () => {
+    setSelectedType(null);
+    setName('');
+    setBasePrice(1000000);
+    setCapacityAdults(2);
+    setCapacityChildren(1);
+    setArea(30);
+    setDescription('');
+    setImage('');
+    setIsEditing(true);
+  };
 
   const handleOpenEdit = (rt: RoomType) => {
     setSelectedType(rt);
@@ -58,26 +81,71 @@ export const RoomTypesManagePage: React.FC = () => {
     setCapacityChildren(rt.capacityChildren ?? 1);
     setArea(rt.area);
     setDescription(rt.description);
+    setImage(rt.image || '');
     setIsEditing(true);
   };
 
-  const handleSave = () => {
-    if (!selectedType) return;
-    const updated = roomTypes.map((rt) =>
-      rt.id === selectedType.id
-        ? {
-            ...rt,
-            name,
-            basePrice,
-            capacityAdults,
-            capacityChildren,
-            area,
-            description,
-          }
-        : rt
-    );
-    setRoomTypes(updated);
-    setIsEditing(false);
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setIsUploading(true);
+      const { url } = await roomService.uploadImage(file);
+      setImage(url);
+    } catch (error: any) {
+      alert(error.message || 'Lỗi tải ảnh');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (basePrice < 0) return alert('Giá cơ bản không được âm');
+    if (area < 1) return alert('Diện tích phải lớn hơn hoặc bằng 1 m²');
+    if (capacityAdults < 1) return alert('Số người lớn tối đa phải từ 1 trở lên');
+    if (capacityChildren < 0) return alert('Số trẻ em tối đa không được âm');
+    
+    try {
+      if (selectedType) {
+        await roomService.updateRoomType(selectedType.id, {
+          name,
+          basePrice,
+          capacityAdults,
+          capacityChildren,
+          area,
+          description,
+          image,
+        });
+        alert('Cập nhật hạng phòng thành công!');
+      } else {
+        await roomService.createRoomType({
+          name,
+          basePrice,
+          capacityAdults,
+          capacityChildren,
+          area,
+          description,
+          image,
+        });
+        alert('Tạo hạng phòng thành công!');
+      }
+      setIsEditing(false);
+      loadData();
+    } catch (error: any) {
+      alert(error.message || 'Lỗi khi lưu hạng phòng');
+    }
+  };
+
+  const handleDelete = async (rt: RoomType) => {
+    if (window.confirm(`Bạn có chắc muốn xóa hạng phòng ${rt.name}?`)) {
+      try {
+        await roomService.deleteRoomType(rt.id);
+        alert('Xóa hạng phòng thành công!');
+        loadData();
+      } catch (error: any) {
+        alert(error.message || 'Không thể xóa hạng phòng');
+      }
+    }
   };
 
   return (
@@ -93,7 +161,7 @@ export const RoomTypesManagePage: React.FC = () => {
         <Button
           variant="gold"
           size="sm"
-          onClick={() => {}}
+          onClick={handleOpenAdd}
           icon={<PlusCircle className="w-4 h-4" />}
           className="font-bold"
         >
@@ -110,7 +178,7 @@ export const RoomTypesManagePage: React.FC = () => {
           >
             <div className="relative h-44">
               <img
-                src={rt.images[0]}
+                src={rt.image || 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=800&q=80'}
                 alt={rt.name}
                 className="w-full h-full object-cover"
               />
@@ -162,6 +230,15 @@ export const RoomTypesManagePage: React.FC = () => {
               <Button
                 variant="outline"
                 size="sm"
+                onClick={() => handleDelete(rt)}
+                icon={<Trash2 className="w-3.5 h-3.5" />}
+                className="text-xs text-rose-600 border-rose-200 hover:bg-rose-50"
+              >
+                Xóa
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => handleOpenEdit(rt)}
                 icon={<Edit2 className="w-3.5 h-3.5" />}
                 className="text-xs"
@@ -177,7 +254,7 @@ export const RoomTypesManagePage: React.FC = () => {
       <Drawer
         isOpen={isEditing}
         onClose={() => setIsEditing(false)}
-        title={selectedType ? `Chỉnh sửa hạng phòng: ${selectedType.name}` : ''}
+        title={selectedType ? `Chỉnh sửa hạng phòng: ${selectedType.name}` : 'Thêm hạng phòng mới'}
         footer={
           <div className="flex justify-end gap-2 w-full">
             <Button variant="outline" size="sm" onClick={() => setIsEditing(false)}>
@@ -200,11 +277,31 @@ export const RoomTypesManagePage: React.FC = () => {
             />
           </div>
 
+          <div>
+            <label className="block font-bold text-[#0F172A] mb-1">Ảnh đại diện:</label>
+            <div className="flex gap-2 items-center">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                disabled={isUploading}
+                className="w-full p-1.5 text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              />
+              {isUploading && <span className="text-blue-600 font-medium text-xs">Đang tải...</span>}
+            </div>
+            {image && (
+              <div className="mt-2 relative w-32 h-20 rounded-md overflow-hidden border border-slate-200">
+                <img src={image} alt="Preview" className="w-full h-full object-cover" />
+              </div>
+            )}
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block font-bold text-[#0F172A] mb-1">Giá cơ bản (₫/đêm):</label>
               <input
                 type="number"
+                min="0"
                 value={basePrice}
                 onChange={(e) => setBasePrice(Number(e.target.value))}
                 className="w-full p-2.5 rounded-lg border border-[#E2E8F0]"
@@ -214,6 +311,7 @@ export const RoomTypesManagePage: React.FC = () => {
               <label className="block font-bold text-[#0F172A] mb-1">Diện tích (m²):</label>
               <input
                 type="number"
+                min="1"
                 value={area}
                 onChange={(e) => setArea(Number(e.target.value))}
                 className="w-full p-2.5 rounded-lg border border-[#E2E8F0]"
@@ -226,6 +324,7 @@ export const RoomTypesManagePage: React.FC = () => {
               <label className="block font-bold text-[#0F172A] mb-1">Số người lớn tối đa:</label>
               <input
                 type="number"
+                min="1"
                 value={capacityAdults}
                 onChange={(e) => setCapacityAdults(Number(e.target.value))}
                 className="w-full p-2.5 rounded-lg border border-[#E2E8F0]"
@@ -235,6 +334,7 @@ export const RoomTypesManagePage: React.FC = () => {
               <label className="block font-bold text-[#0F172A] mb-1">Số trẻ em tối đa:</label>
               <input
                 type="number"
+                min="0"
                 value={capacityChildren}
                 onChange={(e) => setCapacityChildren(Number(e.target.value))}
                 className="w-full p-2.5 rounded-lg border border-[#E2E8F0]"

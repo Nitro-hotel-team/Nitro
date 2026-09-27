@@ -35,8 +35,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/common/Button';
 import { HoldCountdown } from '../../components/common/HoldCountdown';
 import { useApp } from '../../context/AppContext';
-import { MOCK_ROOM_TYPES, MOCK_SERVICES } from '../../mocks/data';
-import { ExtraServiceItem, HotelService } from '../../types';
+import { roomService, hotelServiceService } from '../../services/api';
+import { ExtraServiceItem, HotelService, RoomType } from '../../types';
 import { formatCurrency, formatDate } from '../../utils/format';
 
 export const BookingStep1Page: React.FC = () => {
@@ -44,22 +44,38 @@ export const BookingStep1Page: React.FC = () => {
   const { draftBooking, setDraftBooking, currentUser, language, resetHoldCountdown } = useApp();
   const navigate = useNavigate();
 
+  const [loading, setLoading] = useState(true);
+  const [roomType, setRoomType] = useState<RoomType | null>(null);
+  const [services, setServices] = useState<HotelService[]>([]);
+
   // Redirect if no active draft booking
   useEffect(() => {
     if (!draftBooking || !draftBooking.roomTypeId) {
       navigate('/rooms');
     } else {
-      resetHoldCountdown();
+      const fetchData = async () => {
+        try {
+          const [fetchedRoomType, fetchedServices] = await Promise.all([
+            roomService.getRoomTypeById(draftBooking.roomTypeId),
+            hotelServiceService.getServices()
+          ]);
+          setRoomType(fetchedRoomType);
+          setServices(fetchedServices);
+        } catch (error) {
+          console.error("Failed to load data", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      fetchData();
     }
   }, [draftBooking, navigate]);
 
-  const roomType =
-    MOCK_ROOM_TYPES.find((rt) => rt.id === draftBooking?.roomTypeId) || MOCK_ROOM_TYPES[2];
-
   // Form states
-  const [fullName, setFullName] = useState(draftBooking?.guestName || currentUser.name || '');
-  const [phone, setPhone] = useState(draftBooking?.guestPhone || currentUser.phone || '');
-  const [email, setEmail] = useState(draftBooking?.guestEmail || currentUser.email || '');
+  const [fullName, setFullName] = useState(draftBooking?.guestName || currentUser?.name || '');
+  const [phone, setPhone] = useState(draftBooking?.guestPhone || currentUser?.phone || '');
+  const [email, setEmail] = useState(draftBooking?.guestEmail || currentUser?.email || '');
   const [arrivalTime, setArrivalTime] = useState(draftBooking?.estimatedArrivalTime || '14:00 - 16:00');
   const [specialRequests, setSpecialRequests] = useState(draftBooking?.specialRequests || '');
 
@@ -75,6 +91,14 @@ export const BookingStep1Page: React.FC = () => {
   const [promoCodeInput, setPromoCodeInput] = useState('');
   const [promoDiscountRate, setPromoDiscountRate] = useState(0); // 0 or 0.1 (10%)
   const [promoStatus, setPromoStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+  if (loading) {
+    return <div className="max-w-6xl mx-auto p-8 text-center text-slate-500 text-sm font-semibold">Đang tải dữ liệu đặt phòng...</div>;
+  }
+  
+  if (!roomType) {
+    return <div className="max-w-6xl mx-auto p-8 text-center text-rose-500 font-bold">Không tìm thấy thông tin loại phòng.</div>;
+  }
 
   const nights = draftBooking?.nights || 1;
   const baseRoomTotal = roomType.basePrice * nights;
@@ -288,7 +312,7 @@ export const BookingStep1Page: React.FC = () => {
               </h2>
 
               <div className="space-y-2.5">
-                {MOCK_SERVICES.map((svc) => {
+                {services.map((svc) => {
                   const isChecked = selectedServices.some((s) => s.id === svc.id);
                   return (
                     <label

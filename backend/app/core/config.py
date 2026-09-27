@@ -24,6 +24,15 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 5000
 
+    # --- Google OAuth ---
+    GOOGLE_CLIENT_ID: str = ""
+
+    # --- VNPay Config ---
+    VNPAY_TMN_CODE: str = "TW3QQHOB" # Default sandbox values
+    VNPAY_HASH_SECRET: str = "QMAZYAICPYDZLGKHYMFKSCNNANZLRLLK"
+    VNPAY_URL: str = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
+    VNPAY_RETURN_URL: str = "http://localhost:3000/booking/payment-result"
+
     @property
     def cors_origins_list(self) -> List[str]:
         return json.loads(self.CORS_ORIGINS)
@@ -41,6 +50,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+        extra = "ignore"
 
 
 settings = Settings()

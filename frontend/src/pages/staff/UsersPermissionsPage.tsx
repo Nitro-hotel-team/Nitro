@@ -16,7 +16,7 @@
  * ============================================================================
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Edit2,
   Key,
@@ -30,46 +30,13 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Button } from '../../components/common/Button';
 import { Modal } from '../../components/common/Modal';
+import { userService } from '../../services/api';
 import { User as UserType, UserRole } from '../../types';
-
-const INITIAL_USERS: UserType[] = [
-  {
-    id: 'u-1',
-    name: 'Nguyễn Văn Quản Trị',
-    email: 'admin@nitrohotel.vn',
-    phone: '0909998877',
-    role: 'ADMIN',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80',
-  },
-  {
-    id: 'u-2',
-    name: 'Trần Thị Giám Đốc',
-    email: 'manager@nitrohotel.vn',
-    phone: '0901112233',
-    role: 'MANAGER',
-    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=200&q=80',
-  },
-  {
-    id: 'u-3',
-    name: 'Lê Hoàng Lễ Tân',
-    email: 'reception@nitrohotel.vn',
-    phone: '0903334455',
-    role: 'FRONT_DESK',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-  },
-  {
-    id: 'u-4',
-    name: 'Võ Minh Thuận',
-    email: 'thuan.vo@nitrohotel.vn',
-    phone: '0905556677',
-    role: 'FRONT_DESK',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
-  },
-];
 
 export const UsersPermissionsPage: React.FC = () => {
   const { t } = useTranslation();
-  const [users, setUsers] = useState<UserType[]>(INITIAL_USERS);
+  const [users, setUsers] = useState<UserType[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserType | null>(null);
@@ -78,6 +45,20 @@ export const UsersPermissionsPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [role, setRole] = useState<UserRole>('FRONT_DESK');
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const data = await userService.getUsers();
+        setUsers(data);
+      } catch (err) {
+        console.error('Failed to load users:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUsers();
+  }, []);
 
   const handleOpenAdd = () => {
     setEditingUser(null);
@@ -97,25 +78,30 @@ export const UsersPermissionsPage: React.FC = () => {
     setModalOpen(true);
   };
 
-  const handleSave = () => {
-    if (editingUser) {
-      setUsers(
-        users.map((u) => (u.id === editingUser.id ? { ...u, name, email, phone, role } : u))
-      );
-    } else {
-      setUsers([
-        ...users,
-        {
-          id: `u-${Date.now()}`,
+  const handleSave = async () => {
+    try {
+      if (editingUser) {
+        if (editingUser.role !== role) {
+          await userService.updateUserRole(editingUser.id, role);
+        }
+        setUsers(
+          users.map((u) => (u.id === editingUser.id ? { ...u, name, email, phone, role } : u))
+        );
+      } else {
+        const newUser = await userService.createUser({
           name,
           email,
           phone,
           role,
-          avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-        },
-      ]);
+          password: 'Password@123',
+        });
+        setUsers([...users, newUser]);
+      }
+      setModalOpen(false);
+    } catch (error: any) {
+      console.error('Failed to save user:', error);
+      alert(error.message || 'Lỗi khi lưu tài khoản');
     }
-    setModalOpen(false);
   };
 
   return (
@@ -140,6 +126,11 @@ export const UsersPermissionsPage: React.FC = () => {
       </div>
 
       {/* Table */}
+      {loading ? (
+        <div className="flex justify-center items-center h-40 text-slate-500 text-sm font-semibold">
+          Đang tải danh sách nhân sự...
+        </div>
+      ) : (
       <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-left border-collapse">
@@ -186,7 +177,9 @@ export const UsersPermissionsPage: React.FC = () => {
                       ? 'Toàn quyền cấu hình, nhân sự & phân quyền'
                       : u.role === 'MANAGER'
                       ? 'Báo cáo doanh thu, phòng, dịch vụ'
-                      : 'Check-in, Check-out, sơ đồ phòng, hóa đơn'}
+                      : u.role === 'FRONT_DESK'
+                      ? 'Check-in, Check-out, sơ đồ phòng, hóa đơn'
+                      : 'Người dùng khách (Chỉ xem đơn đặt phòng của mình)'}
                   </td>
                   <td className="py-3 px-4 text-right">
                     <Button
@@ -205,6 +198,7 @@ export const UsersPermissionsPage: React.FC = () => {
           </table>
         </div>
       </div>
+      )}
 
       {/* Modal Add/Edit */}
       <Modal
@@ -261,6 +255,7 @@ export const UsersPermissionsPage: React.FC = () => {
               onChange={(e) => setRole(e.target.value as any)}
               className="w-full p-2.5 rounded-lg border border-[#E2E8F0] bg-white font-semibold"
             >
+              <option value="CUSTOMER" disabled>Khách hàng (Customer) - Người dùng thông thường</option>
               <option value="FRONT_DESK">Lễ tân (Front Desk) - Vận hành ca, check-in, timeline</option>
               <option value="MANAGER">Quản lý (Manager) - Xem báo cáo, doanh thu, quản lý phòng &amp; dịch vụ</option>
               <option value="ADMIN">Quản trị viên (Admin) - Toàn quyền hệ thống</option>

@@ -37,6 +37,7 @@ import { HomePage } from './pages/customer/HomePage';
 import { MyBookingsPage } from './pages/customer/MyBookingsPage';
 import { RoomDetailPage } from './pages/customer/RoomDetailPage';
 import { SearchResultsPage } from './pages/customer/SearchResultsPage';
+import { PaymentResultPage } from './pages/customer/PaymentResultPage';
 
 // Staff Pages
 import { AuditLogsPage } from './pages/staff/AuditLogsPage';
@@ -68,6 +69,7 @@ export default function App() {
             <Route path="rooms/:id" element={<RoomDetailPage />} />
             <Route path="booking/step-1" element={<BookingStep1Page />} />
             <Route path="booking/step-2" element={<BookingStep2Page />} />
+            <Route path="booking/payment-result" element={<PaymentResultPage />} />
             <Route path="booking/step-3" element={<BookingStep3Page />} />
             <Route path="my-bookings" element={<MyBookingsPage />} />
             <Route path="my-bookings/:id" element={<BookingDetailPage />} />
