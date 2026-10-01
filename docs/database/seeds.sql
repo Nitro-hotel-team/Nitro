@@ -83,3 +83,12 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+CREATE INDEX idx_don_dat_phong_ngay 
+ON DON_DAT_PHONG (NgayNhanPhong, NgayTraPhong);
+
+CREATE INDEX idx_don_dat_phong_status_ngay 
+ON DON_DAT_PHONG (TinhTrangDon, NgayNhanPhong, NgayTraPhong);
+
+CREATE INDEX idx_don_dat_phong_thong_ke 
+ON DON_DAT_PHONG (NgayNhanPhong, NgayTraPhong, TinhTrangDon, TongTien, TienCoc);
