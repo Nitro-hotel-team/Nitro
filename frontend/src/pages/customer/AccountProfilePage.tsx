@@ -31,6 +31,7 @@ import { useApp } from '../../context/AppContext';
 export const AccountProfilePage: React.FC = () => {
   const { t } = useTranslation();
   const { currentUser, setCurrentUser, language, setLanguage } = useApp();
+  const isEn = language === 'en';
 
   const [name, setName] = useState(currentUser.name);
   const [email, setEmail] = useState(currentUser.email);
@@ -70,7 +71,7 @@ export const AccountProfilePage: React.FC = () => {
       <div>
         <h1 className="text-2xl font-extrabold text-[#0F172A]">{t('nav.profile')}</h1>
         <p className="text-xs text-[#475569] mt-1">
-          Cập nhật thông tin định danh khách hàng và bảo mật tài khoản cá nhân
+          {t('profile.subtitle')}
         </p>
       </div>
 
@@ -91,13 +92,13 @@ export const AccountProfilePage: React.FC = () => {
           </span>
           <div className="w-full pt-4 border-t border-[#E2E8F0] text-xs text-[#475569] space-y-2 text-left">
             <div>
-              <span className="font-semibold text-slate-700">Thành viên:</span> VIP Silver
+              <span className="font-semibold text-slate-700">{t('profile.membership')}</span> VIP Silver
             </div>
             <div>
-              <span className="font-semibold text-slate-700">Điểm tích lũy:</span> 1.450 NitroPoints
+              <span className="font-semibold text-slate-700">{t('profile.points')}</span> 1.450 NitroPoints
             </div>
             <div>
-              <span className="font-semibold text-slate-700">Số đêm đã ở:</span> 6 đêm
+              <span className="font-semibold text-slate-700">{t('profile.nightsCount')}</span> 6 {isEn ? 'nights' : 'đêm'}
             </div>
           </div>
         </div>
@@ -108,12 +109,12 @@ export const AccountProfilePage: React.FC = () => {
           <div className="bg-white border border-[#E2E8F0] rounded-2xl p-6 shadow-xs space-y-4">
             <h2 className="text-sm font-bold text-[#0F172A] flex items-center gap-2 border-b border-[#E2E8F0] pb-3">
               <User className="w-4 h-4 text-[#1F5AA6]" />
-              Thông tin cá nhân
+              {t('profile.personalInfoTitle')}
             </h2>
 
             <form onSubmit={handleSaveProfile} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-[#475569] mb-1">Họ và tên</label>
+                <label className="block text-xs font-bold text-[#475569] mb-1">{t('profile.fullName')}</label>
                 <input
                   type="text"
                   value={name}
@@ -124,7 +125,7 @@ export const AccountProfilePage: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-[#475569] mb-1">Email</label>
+                  <label className="block text-xs font-bold text-[#475569] mb-1">{t('profile.email')}</label>
                   <input
                     type="email"
                     value={email}
@@ -134,7 +135,7 @@ export const AccountProfilePage: React.FC = () => {
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-[#475569] mb-1">
-                    Số điện thoại
+                    {t('profile.phone')}
                   </label>
                   <input
                     type="tel"
@@ -148,7 +149,7 @@ export const AccountProfilePage: React.FC = () => {
               {savedSuccess && (
                 <div className="text-xs text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1.5">
                   <Check className="w-4 h-4 text-emerald-600" />
-                  Đã lưu cập nhật thông tin thành công!
+                  {t('profile.saveSuccess')}
                 </div>
               )}
 
@@ -158,7 +159,7 @@ export const AccountProfilePage: React.FC = () => {
                 size="sm"
                 icon={<Save className="w-4 h-4" />}
               >
-                Lưu thay đổi
+                {t('profile.saveChanges')}
               </Button>
             </form>
           </div>
@@ -167,13 +168,13 @@ export const AccountProfilePage: React.FC = () => {
           <div className="bg-white border border-[#E2E8F0] rounded-2xl p-6 shadow-xs space-y-4">
             <h2 className="text-sm font-bold text-[#0F172A] flex items-center gap-2 border-b border-[#E2E8F0] pb-3">
               <Lock className="w-4 h-4 text-[#1F5AA6]" />
-              Đổi mật khẩu
+              {t('profile.changePasswordTitle')}
             </h2>
 
             <form onSubmit={handleSavePassword} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-[#475569] mb-1">
-                  Mật khẩu hiện tại
+                  {t('profile.currentPassword')}
                 </label>
                 <input
                   type="password"
@@ -187,25 +188,25 @@ export const AccountProfilePage: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-[#475569] mb-1">
-                    Mật khẩu mới
+                    {t('profile.newPassword')}
                   </label>
                   <input
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Tối thiểu 8 ký tự"
+                    placeholder={t('profile.newPasswordPlaceholder')}
                     className="w-full text-xs px-3.5 py-2 rounded-lg border border-[#E2E8F0] focus:ring-2 focus:ring-[#1F5AA6]"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-[#475569] mb-1">
-                    Nhập lại mật khẩu mới
+                    {t('profile.confirmPassword')}
                   </label>
                   <input
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Khớp với mật khẩu mới"
+                    placeholder={t('profile.confirmPasswordPlaceholder')}
                     className="w-full text-xs px-3.5 py-2 rounded-lg border border-[#E2E8F0] focus:ring-2 focus:ring-[#1F5AA6]"
                   />
                 </div>
@@ -214,7 +215,7 @@ export const AccountProfilePage: React.FC = () => {
               {passwordSuccess && (
                 <div className="text-xs text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1.5">
                   <Check className="w-4 h-4 text-emerald-600" />
-                  Mật khẩu đã được thay đổi thành công!
+                  {t('profile.passwordSuccess')}
                 </div>
               )}
 
@@ -224,7 +225,7 @@ export const AccountProfilePage: React.FC = () => {
                 size="sm"
                 icon={<Key className="w-4 h-4" />}
               >
-                Cập nhật mật khẩu
+                {t('profile.updatePassword')}
               </Button>
             </form>
           </div>

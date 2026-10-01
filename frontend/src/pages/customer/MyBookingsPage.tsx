@@ -33,6 +33,7 @@ import { Button } from '../../components/common/Button';
 import { EmptyState, Skeleton } from '../../components/common/StateViews';
 import { StatusBadge } from '../../components/common/StatusBadge';
 import { useApp } from '../../context/AppContext';
+import { MOCK_ROOM_TYPES } from '../../mocks/data';
 import { bookingService } from '../../services/api';
 import { Booking, BookingStatus } from '../../types';
 import { formatCurrency, formatDate } from '../../utils/format';
@@ -40,6 +41,7 @@ import { formatCurrency, formatDate } from '../../utils/format';
 export const MyBookingsPage: React.FC = () => {
   const { t } = useTranslation();
   const { language, currentUser } = useApp();
+  const isEn = language === 'en';
   const navigate = useNavigate();
 
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -77,7 +79,7 @@ export const MyBookingsPage: React.FC = () => {
         <div>
           <h1 className="text-2xl font-extrabold text-[#0F172A]">{t('nav.myBookings')}</h1>
           <p className="text-xs text-[#475569] mt-1">
-            Quản lý lịch sử đặt phòng, xem mã QR check-in và hóa đơn điện tử của bạn
+            {t('myBookings.subtitle')}
           </p>
         </div>
         <Button
@@ -85,7 +87,7 @@ export const MyBookingsPage: React.FC = () => {
           size="sm"
           onClick={() => navigate('/rooms')}
         >
-          + Đặt thêm phòng mới
+          {t('myBookings.newBookingBtn')}
         </Button>
       </div>
 
@@ -94,10 +96,10 @@ export const MyBookingsPage: React.FC = () => {
         {/* Tabs */}
         <div className="flex items-center gap-1 overflow-x-auto w-full md:w-auto p-1 bg-slate-100 rounded-xl">
           {[
-            { key: 'UPCOMING', label: 'Sắp tới' },
-            { key: 'IN_HOUSE', label: 'Đang lưu trú' },
-            { key: 'COMPLETED', label: 'Đã hoàn thành' },
-            { key: 'CANCELLED', label: 'Đã hủy' },
+            { key: 'UPCOMING', label: t('myBookings.tabUpcoming') },
+            { key: 'IN_HOUSE', label: t('myBookings.tabInHouse') },
+            { key: 'COMPLETED', label: t('myBookings.tabCompleted') },
+            { key: 'CANCELLED', label: t('myBookings.tabCancelled') },
           ].map((tab) => {
             const active = activeTab === tab.key;
             return (
@@ -123,7 +125,7 @@ export const MyBookingsPage: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Tìm theo mã phòng / tên..."
+            placeholder={t('myBookings.searchPlaceholder')}
             className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#1F5AA6] focus:bg-white"
           />
         </div>
@@ -137,63 +139,72 @@ export const MyBookingsPage: React.FC = () => {
         </div>
       ) : filteredBookings.length > 0 ? (
         <div className="space-y-4">
-          {filteredBookings.map((b) => (
-            <div
-              key={b.id}
-              className="bg-white border border-[#E2E8F0] hover:border-[#1F5AA6] transition rounded-2xl p-5 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
-            >
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[#EAF2FB] text-[#1F5AA6] flex items-center justify-center shrink-0">
-                  <DoorOpen className="w-6 h-6" />
+          {filteredBookings.map((b) => {
+            const rt = MOCK_ROOM_TYPES.find((r) => r.id === b.roomTypeId || r.name === b.roomTypeName);
+            const localizedRoomName = isEn && rt?.nameEn ? rt.nameEn : b.roomTypeName;
+
+            return (
+              <div
+                key={b.id}
+                className="bg-white border border-[#E2E8F0] hover:border-[#1F5AA6] transition rounded-2xl p-5 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-[#EAF2FB] text-[#1F5AA6] flex items-center justify-center shrink-0">
+                    <DoorOpen className="w-6 h-6" />
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-bold text-sm text-[#0F172A]">
+                        {b.bookingCode}
+                      </span>
+                      <StatusBadge status={b.status} type="booking" size="sm" />
+                    </div>
+
+                    <h3 className="text-base font-bold text-[#1F5AA6]">{localizedRoomName}</h3>
+
+                    <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-[#475569]">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                        {formatDate(b.checkInDate)} &rarr; {formatDate(b.checkOutDate)} ({b.nights} {t('search.nights')})
+                      </span>
+                      <span>
+                        {t('myBookings.roomAssignedPrefix')} {b.roomNumber || t('myBookings.roomUnassigned')}
+                      </span>
+                      <span>
+                        {t('myBookings.guestPrefix')} {b.guestName}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold text-sm text-[#0F172A]">
-                      {b.bookingCode}
-                    </span>
-                    <StatusBadge status={b.status} type="booking" size="sm" />
+                {/* Right Details & CTA */}
+                <div className="flex items-center justify-between md:justify-end w-full md:w-auto gap-6 border-t md:border-t-0 pt-3 md:pt-0 border-slate-100">
+                  <div className="text-left md:text-right">
+                    <div className="text-[11px] text-[#94A3B8]">{t('myBookings.totalPayment')}</div>
+                    <div className="text-base font-extrabold text-[#0F172A] tabular-nums">
+                      {formatCurrency(b.totalAmount, language)}
+                    </div>
                   </div>
 
-                  <h3 className="text-base font-bold text-[#1F5AA6]">{b.roomTypeName}</h3>
-
-                  <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-[#475569]">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                      {formatDate(b.checkInDate)} &rarr; {formatDate(b.checkOutDate)} ({b.nights} đêm)
-                    </span>
-                    <span>Phòng: {b.roomNumber || 'Chưa xếp phòng'}</span>
-                    <span>Khách: {b.guestName}</span>
-                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate(`/my-bookings/${b.id}`)}
+                    icon={<Eye className="w-4 h-4" />}
+                  >
+                    {t('myBookings.detailsBtn')}
+                  </Button>
                 </div>
               </div>
-
-              {/* Right Details & CTA */}
-              <div className="flex items-center justify-between md:justify-end w-full md:w-auto gap-6 border-t md:border-t-0 pt-3 md:pt-0 border-slate-100">
-                <div className="text-left md:text-right">
-                  <div className="text-[11px] text-[#94A3B8]">Tổng thanh toán:</div>
-                  <div className="text-base font-extrabold text-[#0F172A] tabular-nums">
-                    {formatCurrency(b.totalAmount, language)}
-                  </div>
-                </div>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate(`/my-bookings/${b.id}`)}
-                  icon={<Eye className="w-4 h-4" />}
-                >
-                  Chi tiết
-                </Button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <EmptyState
-          title="Không có đặt phòng nào trong mục này"
-          description="Bạn chưa có đặt phòng nào ở trạng thái này hoặc tìm kiếm không khớp."
-          actionText="Tìm và đặt phòng ngay"
+          title={t('myBookings.emptyTitle')}
+          description={t('myBookings.emptyDesc')}
+          actionText={t('myBookings.emptyAction')}
           onAction={() => navigate('/rooms')}
         />
       )}

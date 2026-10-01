@@ -104,16 +104,15 @@ export const HomePage: React.FC = () => {
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-8 pb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[#C9A227] text-xs font-semibold uppercase tracking-widest mb-6">
             <Sparkles className="w-3.5 h-3.5" />
-            24 Nguyễn Huệ • Quận 1 • TP. Hồ Chí Minh
+            {t('home.locationBadge')}
           </div>
 
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight max-w-4xl mx-auto mb-4">
-            Trải nghiệm đẳng cấp 4 sao giữa trái tim Sài Gòn
+            {t('home.heroTitle')}
           </h1>
 
           <p className="text-base sm:text-lg text-slate-200 max-w-2xl mx-auto mb-10 font-light">
-            Thả mình vào không gian kiến trúc tân cổ điển sang trọng, ngắm trọn đại lộ Nguyễn Huệ
-            sôi động và tận hưởng dịch vụ lưu trú hoàn hảo 24/7.
+            {t('home.heroDesc')}
           </p>
 
           {/* Floating Search Widget */}
@@ -167,10 +166,10 @@ export const HomePage: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
           <div>
             <div className="text-xs font-bold text-[#1F5AA6] uppercase tracking-wider mb-1">
-              Hạng phòng lưu trú
+              {t('home.featuredRoomsSubtitle')}
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A]">
-              Loại phòng nổi bật tại Nitro Grand
+              {t('home.featuredRoomsTitle')}
             </h2>
           </div>
           <Button
@@ -178,7 +177,7 @@ export const HomePage: React.FC = () => {
             size="sm"
             onClick={() => navigate('/rooms')}
           >
-            Xem tất cả phòng &rarr;
+            {t('home.viewAllRooms')}
           </Button>
         </div>
 
@@ -206,10 +205,10 @@ export const HomePage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <div className="text-xs font-bold text-[#1F5AA6] uppercase tracking-wider mb-1">
-              Đặc quyền khách hàng
+              {t('home.whyChooseUsSubtitle')}
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A]">
-              Vì sao hơn 10.000+ khách chọn Nitro Grand?
+              {t('home.whyChooseUsTitle')}
             </h2>
           </div>
 
@@ -218,9 +217,9 @@ export const HomePage: React.FC = () => {
               <div className="w-12 h-12 rounded-xl bg-[#EAF2FB] text-[#1F5AA6] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Clock className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-bold text-[#0F172A] mb-2">Đặt phòng 24/7</h3>
+              <h3 className="text-base font-bold text-[#0F172A] mb-2">{t('home.feature1Title')}</h3>
               <p className="text-xs text-[#475569] leading-relaxed">
-                Hệ thống trực tuyến thông minh, giữ chỗ tạm tức thì và không phụ thu bất ngờ.
+                {t('home.feature1Desc')}
               </p>
             </div>
 
@@ -228,9 +227,9 @@ export const HomePage: React.FC = () => {
               <div className="w-12 h-12 rounded-xl bg-[#EAF2FB] text-[#1F5AA6] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-bold text-[#0F172A] mb-2">Xác nhận tức thì</h3>
+              <h3 className="text-base font-bold text-[#0F172A] mb-2">{t('home.feature2Title')}</h3>
               <p className="text-xs text-[#475569] leading-relaxed">
-                Mã đặt phòng và mã QR check-in gửi ngay qua email &amp; SMS trong vòng 10 giây.
+                {t('home.feature2Desc')}
               </p>
             </div>
 
@@ -238,9 +237,9 @@ export const HomePage: React.FC = () => {
               <div className="w-12 h-12 rounded-xl bg-[#EAF2FB] text-[#1F5AA6] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <ShieldCheck className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-bold text-[#0F172A] mb-2">Thanh toán bảo mật</h3>
+              <h3 className="text-base font-bold text-[#0F172A] mb-2">{t('home.feature3Title')}</h3>
               <p className="text-xs text-[#475569] leading-relaxed">
-                Tích hợp cổng thanh toán chuẩn quốc tế PCI-DSS. Cam kết không lưu dữ liệu thẻ.
+                {t('home.feature3Desc')}
               </p>
             </div>
 
@@ -248,9 +247,9 @@ export const HomePage: React.FC = () => {
               <div className="w-12 h-12 rounded-xl bg-[#EAF2FB] text-[#1F5AA6] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Headphones className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-bold text-[#0F172A] mb-2">Hỗ trợ song ngữ VI / EN</h3>
+              <h3 className="text-base font-bold text-[#0F172A] mb-2">{t('home.feature4Title')}</h3>
               <p className="text-xs text-[#475569] leading-relaxed">
-                Đội ngũ lễ tân thân thiện, chuyên nghiệp phục vụ khách quốc tế và trong nước.
+                {t('home.feature4Desc')}
               </p>
             </div>
           </div>
@@ -261,10 +260,10 @@ export const HomePage: React.FC = () => {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <div className="text-xs font-bold text-[#1F5AA6] uppercase tracking-wider mb-1">
-            Dịch vụ &amp; Tiện ích
+            {t('home.amenitiesSubtitle')}
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A]">
-            Tận hưởng trọn vẹn kỳ nghỉ hoàn mỹ
+            {t('home.amenitiesTitle')}
           </h2>
         </div>
 
@@ -272,16 +271,16 @@ export const HomePage: React.FC = () => {
           <div className="relative rounded-2xl overflow-hidden group h-80 shadow-md">
             <img
               src="https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=800&q=80"
-              alt="Hồ bơi vô cực ngắm Bitexco"
+              alt="Nitro Grand Rooftop Pool"
               className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-6 flex flex-col justify-end text-white">
               <div className="flex items-center gap-2 text-[#C9A227] text-xs font-bold uppercase tracking-wider mb-1">
-                <Waves className="w-4 h-4" /> Tầng thượng Rooftop
+                <Waves className="w-4 h-4" /> {t('home.amenity1Category')}
               </div>
-              <h3 className="text-xl font-bold">Hồ bơi vô cực ngắm trọn Sài Gòn</h3>
+              <h3 className="text-xl font-bold">{t('home.amenity1Title')}</h3>
               <p className="text-xs text-slate-300 mt-1">
-                Ngâm mình trong làn nước ấm và thưởng thức cocktail lúc hoàng hôn.
+                {t('home.amenity1Desc')}
               </p>
             </div>
           </div>
@@ -289,16 +288,16 @@ export const HomePage: React.FC = () => {
           <div className="relative rounded-2xl overflow-hidden group h-80 shadow-md">
             <img
               src="https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&w=800&q=80"
-              alt="Nhà hàng buffet tầng 2"
+              alt="Nitro Grand Le Grand Buffet"
               className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-6 flex flex-col justify-end text-white">
               <div className="flex items-center gap-2 text-[#C9A227] text-xs font-bold uppercase tracking-wider mb-1">
-                <Utensils className="w-4 h-4" /> Ẩm thực 4 sao
+                <Utensils className="w-4 h-4" /> {t('home.amenity2Category')}
               </div>
-              <h3 className="text-xl font-bold">Nhà hàng Le Grand Buffet</h3>
+              <h3 className="text-xl font-bold">{t('home.amenity2Title')}</h3>
               <p className="text-xs text-slate-300 mt-1">
-                Thực đơn kết hợp tinh hoa ẩm thực Á - Âu và đặc sản Sài Gòn nức tiếng.
+                {t('home.amenity2Desc')}
               </p>
             </div>
           </div>
@@ -306,16 +305,16 @@ export const HomePage: React.FC = () => {
           <div className="relative rounded-2xl overflow-hidden group h-80 shadow-md">
             <img
               src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80"
-              alt="Spa & Gym"
+              alt="Nitro Grand Lotus Wellness & Fitness"
               className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-6 flex flex-col justify-end text-white">
               <div className="flex items-center gap-2 text-[#C9A227] text-xs font-bold uppercase tracking-wider mb-1">
-                <Sparkles className="w-4 h-4" /> Chăm sóc sức khỏe
+                <Sparkles className="w-4 h-4" /> {t('home.amenity3Category')}
               </div>
-              <h3 className="text-xl font-bold">Lotus Wellness &amp; Fitness</h3>
+              <h3 className="text-xl font-bold">{t('home.amenity3Title')}</h3>
               <p className="text-xs text-slate-300 mt-1">
-                Liệu trình massage tinh dầu thảo dược và phòng tập gym trang bị hiện đại.
+                {t('home.amenity3Desc')}
               </p>
             </div>
           </div>
@@ -332,58 +331,55 @@ export const HomePage: React.FC = () => {
               ))}
             </div>
             <h3 className="text-xl font-bold text-[#0F172A]">
-              "Trải nghiệm tuyệt vời tại trung tâm phố đi bộ"
+              {t('home.reviewsHeadline')}
             </h3>
             <p className="text-xs text-[#475569] mt-1">
-              Đánh giá trung bình 4.9/5 từ hơn 1.200 lượt khách hàng thực tế
+              {t('home.reviewsSubtext')}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white p-5 rounded-xl border border-[#E2E8F0] shadow-xs">
               <p className="text-xs text-[#475569] italic mb-4 leading-relaxed">
-                "Vị trí quá đắc địa ngay 24 Nguyễn Huệ, đi bộ vài bước là ra bến Bạch Đằng và
-                phố đi bộ. Phòng Deluxe view cực đẹp, cách âm tuyệt đối."
+                {t('home.review1Text')}
               </p>
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-blue-100 font-bold text-[#1F5AA6] flex items-center justify-center text-xs">
                   NA
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-[#0F172A]">Nguyễn Văn An</div>
-                  <div className="text-[11px] text-[#94A3B8]">Khách công tác • 3 đêm</div>
+                  <div className="text-xs font-bold text-[#0F172A]">{t('home.review1Author')}</div>
+                  <div className="text-[11px] text-[#94A3B8]">{t('home.review1Stay')}</div>
                 </div>
               </div>
             </div>
 
             <div className="bg-white p-5 rounded-xl border border-[#E2E8F0] shadow-xs">
               <p className="text-xs text-[#475569] italic mb-4 leading-relaxed">
-                "Gia đình tôi ở phòng Family Suite 2 phòng ngủ rất rộng rãi và tiện lợi.
-                Nhân viên lễ tân hỗ trợ check-in rất nhanh bằng mã QR trên điện thoại."
+                {t('home.review2Text')}
               </p>
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-pink-100 font-bold text-pink-600 flex items-center justify-center text-xs">
-                  BN
+                  DW
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-[#0F172A]">Trần Thị Bích Ngọc</div>
-                  <div className="text-[11px] text-[#94A3B8]">Kỳ nghỉ gia đình • 4 khách</div>
+                  <div className="text-xs font-bold text-[#0F172A]">{t('home.review2Author')}</div>
+                  <div className="text-[11px] text-[#94A3B8]">{t('home.review2Stay')}</div>
                 </div>
               </div>
             </div>
 
             <div className="bg-white p-5 rounded-xl border border-[#E2E8F0] shadow-xs">
               <p className="text-xs text-[#475569] italic mb-4 leading-relaxed">
-                "Impressive 4-star service! The breakfast buffet was superb with diverse Vietnamese
-                and Western options. Excellent English communication by front desk."
+                {t('home.review3Text')}
               </p>
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-purple-100 font-bold text-purple-600 flex items-center justify-center text-xs">
-                  JS
+                  TT
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-[#0F172A]">John Smith</div>
-                  <div className="text-[11px] text-[#94A3B8]">London, UK • 2 stays</div>
+                  <div className="text-xs font-bold text-[#0F172A]">{t('home.review3Author')}</div>
+                  <div className="text-[11px] text-[#94A3B8]">{t('home.review3Stay')}</div>
                 </div>
               </div>
             </div>
