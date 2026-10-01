@@ -64,7 +64,7 @@ export const RoomDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const { t } = useTranslation();
-  const { language, setDraftBooking } = useApp();
+  const { language, setDraftBooking, resetHoldCountdown } = useApp();
   const navigate = useNavigate();
 
   const [roomType, setRoomType] = useState<RoomType | null>(null);
@@ -169,6 +169,7 @@ export const RoomDetailPage: React.FC = () => {
 
   // Đặt phòng ngay -> Ghi nhớ vào AppContext và sang Bước 1
   const handleBookNow = () => {
+    resetHoldCountdown();
     setDraftBooking({
       roomTypeId: roomType.id,
       roomTypeName: roomType.name,

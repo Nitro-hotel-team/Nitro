@@ -1,0 +1,1 @@
+([TinhTrang]=N'Bảo trì' OR [TinhTrang]=N'Đang sử dụng' OR [TinhTrang]=N'Đã đặt' OR [TinhTrang]=N'Còn trống')

@@ -22,7 +22,9 @@ import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/common/Button';
 import { useApp } from '../../context/AppContext';
-import { MOCK_USERS } from '../../mocks/data';
+import { GoogleLogin } from '@react-oauth/google';
+import { authService } from '../../services/api';
+
 import { UserRole } from '../../types';
 
 export const LoginPage: React.FC = () => {
@@ -76,6 +78,30 @@ export const LoginPage: React.FC = () => {
   const handleSelectAccount = (email: string) => {
     setEmailOrPhone(email);
     setPassword('password123');
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    setIsSubmitting(true);
+    setErrorMsg('');
+    try {
+      const res = await authService.loginWithGoogle(credentialResponse.credential);
+      const userRole = res.user?.role;
+      if (userRole === 'CUSTOMER') {
+        navigate('/');
+      } else if (userRole === 'FRONT_DESK') {
+        navigate('/staff/overview');
+      } else if (userRole === 'MANAGER') {
+        navigate('/staff/dashboard');
+      } else if (userRole === 'ADMIN') {
+        navigate('/staff/users');
+      } else {
+        navigate('/');
+      }
+    } catch (error: any) {
+      setErrorMsg(error.message || 'Đăng nhập Google thất bại');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 // =============================================================================================================
   return (
@@ -190,6 +216,27 @@ export const LoginPage: React.FC = () => {
               {isSubmitting ? t('auth.authenticating') : t('auth.loginButton')}
             </Button>
           </form>
+          
+          <div className="flex flex-col items-center mt-4">
+            <div className="relative w-full text-center">
+              <span className="bg-white px-2 text-xs text-slate-500 relative z-10">hoặc đăng nhập với</span>
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-200"></div>
+              </div>
+            </div>
+            <div className="mt-4 w-full flex justify-center">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setErrorMsg('Không thể kết nối với Google')}
+                theme="outline"
+                size="large"
+                shape="rectangular"
+                width="100%"
+                text="signin_with"
+              />
+            </div>
+          </div>
+          
 {/* ======================================================Tài Khoản Mẫu======================================== */}
           {/* Quick Mock Accounts for Testing */}
           <div className="pt-4 border-t border-[#E2E8F0]">

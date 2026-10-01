@@ -14,7 +14,7 @@
  * ============================================================================
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Car,
   Coffee,
@@ -28,60 +28,14 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Button } from '../../components/common/Button';
 import { Modal } from '../../components/common/Modal';
+import { hotelServiceService } from '../../services/api';
 import { Service } from '../../types';
 import { formatCurrency } from '../../utils/format';
 
-const INITIAL_SERVICES: Service[] = [
-  {
-    id: 'srv-1',
-    name: 'Buffet Sáng Quốc Tế',
-    price: 250000,
-    unit: 'khách/ngày',
-    category: 'F&B',
-    description: 'Hơn 50 món Á - Âu thượng hạng tại nhà hàng Saigon Delight tầng 2.',
-    isActive: true,
-  },
-  {
-    id: 'srv-2',
-    name: 'Đưa đón Sân bay Tân Sơn Nhất',
-    price: 450000,
-    unit: 'lượt',
-    category: 'Vận chuyển',
-    description: 'Xe Mercedes / Sedona đưa đón tận sảnh ga quốc nội hoặc quốc tế.',
-    isActive: true,
-  },
-  {
-    id: 'srv-3',
-    name: 'Trọn gói Spa Thư Giãn (60 phút)',
-    price: 600000,
-    unit: 'suất',
-    category: 'Chăm sóc sức khỏe',
-    description: 'Massage tinh dầu thiên nhiên và xông hơi thảo dược tại Lotus Spa.',
-    isActive: true,
-  },
-  {
-    id: 'srv-4',
-    name: 'Giặt ủi Lấy Nhanh trong ngày',
-    price: 150000,
-    unit: 'kg',
-    category: 'Tiện ích',
-    description: 'Giặt hấp cao cấp, ủi phẳng và giao tận cửa phòng trong 4 giờ.',
-    isActive: true,
-  },
-  {
-    id: 'srv-5',
-    name: 'Set Trà Chiều Hoàng Gia',
-    price: 350000,
-    unit: 'set',
-    category: 'F&B',
-    description: 'Bánh ngọt Pháp và trà Earl Grey thượng hạng tại Sky Lounge tầng 11.',
-    isActive: true,
-  },
-];
-
 export const ServicesManagePage: React.FC = () => {
   const { t } = useTranslation();
-  const [services, setServices] = useState<Service[]>(INITIAL_SERVICES);
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
 
@@ -107,8 +61,36 @@ export const ServicesManagePage: React.FC = () => {
     setPrice(srv.price);
     setUnit(srv.unit);
     setCategory(srv.category || 'F&B');
-    setDescription(srv.description);
+    setDescription(srv.description || '');
     setModalOpen(true);
+  };
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const data = await hotelServiceService.getServices();
+        setServices(data.map(d => ({
+          ...d,
+          isActive: d.status === 'ACTIVE'
+        })));
+      } catch (err) {
+        console.error('Failed to fetch services', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchServices();
+  }, []);
+
+  const handleToggle = async (id: string) => {
+    try {
+      await hotelServiceService.toggleService(id);
+      setServices(services.map((s) => 
+        s.id === id ? { ...s, isActive: !s.isActive, status: s.isActive ? 'INACTIVE' : 'ACTIVE' } : s
+      ));
+    } catch (error) {
+      console.error('Failed to toggle service', error);
+    }
   };
 
   const handleSave = () => {
@@ -159,6 +141,11 @@ export const ServicesManagePage: React.FC = () => {
       </div>
 
       {/* Grid of Services */}
+      {loading ? (
+        <div className="flex justify-center items-center h-40 text-slate-500 text-sm font-semibold">
+          Đang tải danh sách dịch vụ...
+        </div>
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {services.map((srv) => (
           <div
@@ -180,9 +167,16 @@ export const ServicesManagePage: React.FC = () => {
             </div>
 
             <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-              <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-                Đang hoạt động
-              </span>
+              <button
+                onClick={() => handleToggle(srv.id)}
+                className={`text-xs font-semibold px-2 py-0.5 rounded cursor-pointer transition ${
+                  srv.isActive
+                    ? 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100'
+                    : 'text-slate-500 bg-slate-100 hover:bg-slate-200'
+                }`}
+              >
+                {srv.isActive ? 'Đang hoạt động' : 'Tạm ngưng'}
+              </button>
 
               <Button
                 variant="outline"
@@ -197,6 +191,7 @@ export const ServicesManagePage: React.FC = () => {
           </div>
         ))}
       </div>
+      )}
 
       {/* Modal Add/Edit */}
       <Modal

@@ -20,13 +20,18 @@ import { createRoot } from 'react-dom/client';
 import './i18n';
 import App from './App.tsx';
 import './index.css';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+
+const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'dummy-client-id';
 
 // Khởi tạo React Virtual DOM gắn kết vào thẻ root HTML
 const rootElement = document.getElementById('root');
 if (rootElement) {
   createRoot(rootElement).render(
     <StrictMode>
-      <App />
+      <GoogleOAuthProvider clientId={clientId}>
+        <App />
+      </GoogleOAuthProvider>
     </StrictMode>,
   );
 }

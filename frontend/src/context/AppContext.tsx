@@ -18,7 +18,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MOCK_USERS } from '../mocks/data';
+
 import { authService } from '../services/api';
 import { Booking, User, UserRole } from '../types';
 
@@ -60,6 +60,16 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+const createDefaultUser = (role: UserRole): User => ({
+  id: `default-${role.toLowerCase()}`,
+  name: role === 'CUSTOMER' ? 'Khách hàng' : `User ${role}`,
+  email: '',
+  phone: '',
+  role: role,
+  status: 'ACTIVE',
+  avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80',
+});
+
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { i18n } = useTranslation();
 
@@ -79,14 +89,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const savedUser = localStorage.getItem('nitro_current_user');
     if (savedUser) {
       try {
-        return JSON.parse(savedUser);
+        const parsed = JSON.parse(savedUser);
+        if (parsed) return parsed;
       } catch {
         // ignore parse error
       }
     }
     const savedRole = localStorage.getItem('nitro_user_role') as UserRole;
-    const matched = MOCK_USERS.find((u) => u.role === savedRole);
-    return matched || MOCK_USERS[0];
+    return createDefaultUser(savedRole || 'CUSTOMER');
   });
 
   const [language, setLanguageState] = useState<'vi' | 'en'>('vi');
@@ -118,7 +128,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           await authService.logout();
           setToken(null);
           setRoleState('CUSTOMER');
-          setCurrentUserState(MOCK_USERS[0]);
+          setCurrentUserState(createDefaultUser('CUSTOMER'));
         }
       }
       setIsAuthLoading(false);
@@ -154,7 +164,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await authService.logout();
     setToken(null);
     setRoleState('CUSTOMER');
-    setCurrentUserState(MOCK_USERS[0]);
+    setCurrentUserState(createDefaultUser('CUSTOMER'));
   };
 
   const setCurrentUser = (user: User) => {
@@ -165,12 +175,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const setRole = (newRole: UserRole) => {
     setRoleState(newRole);
     localStorage.setItem('nitro_user_role', newRole);
-    // Auto sync current user with mock user for the role
-    const matched = MOCK_USERS.find((u) => u.role === newRole);
-    if (matched) {
-      setCurrentUserState(matched);
-      localStorage.setItem('nitro_current_user', JSON.stringify(matched));
-    }
+    const mockUser = createDefaultUser(newRole);
+    setCurrentUserState(mockUser);
+    localStorage.setItem('nitro_current_user', JSON.stringify(mockUser));
   };
 
   const setLanguage = (lang: 'vi' | 'en') => {

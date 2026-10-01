@@ -1,7 +1,13 @@
 node_modules/
 .env
-dist/
+dist/.
 build/
 .vscode/
 .idea/
 Thumbs.db
+# Python
+__pycache__/
+*.pyc
+venv/
+backend/venv/
+.env.*

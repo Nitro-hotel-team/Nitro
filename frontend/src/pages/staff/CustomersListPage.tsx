@@ -14,7 +14,7 @@
  * ============================================================================
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Award,
   Calendar,
@@ -31,73 +31,31 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Button } from '../../components/common/Button';
 import { Drawer } from '../../components/common/Drawer';
+import { guestService } from '../../services/api';
 import { Guest } from '../../types';
 import { formatCurrency } from '../../utils/format';
 
-const MOCK_GUESTS: Guest[] = [
-  {
-    id: 'g-1',
-    fullName: 'Nguyễn Văn An',
-    phone: '0901234567',
-    email: 'an.nguyen@example.com',
-    identityNumber: '079094001234',
-    totalBookings: 5,
-    totalSpent: 18500000,
-    vipTier: 'Gold',
-    notes: 'Thích tầng cao, view phố đi bộ, phòng không hút thuốc.',
-  },
-  {
-    id: 'g-2',
-    fullName: 'Trần Thị Mai',
-    phone: '0918765432',
-    email: 'mai.tran@example.com',
-    identityNumber: '079198005678',
-    totalBookings: 8,
-    totalSpent: 34200000,
-    vipTier: 'VIP Platinum',
-    notes: 'Khách VIP doanh nghiệp, cần hoa tươi và xe đưa đón sân bay.',
-  },
-  {
-    id: 'g-3',
-    fullName: 'David Smith',
-    phone: '+1 415 555 2671',
-    email: 'david.smith@techcorp.com',
-    identityNumber: 'P4829104',
-    totalBookings: 2,
-    totalSpent: 8900000,
-    vipTier: 'Silver',
-    notes: 'Ăn chay, yêu cầu xuất hóa đơn VAT công ty.',
-  },
-  {
-    id: 'g-4',
-    fullName: 'Lê Hoàng Nam',
-    phone: '0933112233',
-    email: 'nam.le@vietstar.vn',
-    identityNumber: '079089009988',
-    totalBookings: 1,
-    totalSpent: 3200000,
-    vipTier: 'Standard',
-    notes: 'Check-in muộn sau 20:00.',
-  },
-  {
-    id: 'g-5',
-    fullName: 'Phạm Thu Hương',
-    phone: '0988776655',
-    email: 'huong.pham@fashion.vn',
-    identityNumber: '079192003344',
-    totalBookings: 4,
-    totalSpent: 15600000,
-    vipTier: 'Gold',
-    notes: 'Yêu cầu phòng yên tĩnh gần thang máy.',
-  },
-];
-
 export const CustomersListPage: React.FC = () => {
   const { t } = useTranslation();
-  const [guests, setGuests] = useState<Guest[]>(MOCK_GUESTS);
+  const [guests, setGuests] = useState<Guest[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
   const [guestNotes, setGuestNotes] = useState('');
+
+  useEffect(() => {
+    const fetchGuests = async () => {
+      try {
+        const data = await guestService.getGuests();
+        setGuests(data);
+      } catch (err) {
+        console.error('Failed to load guests:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchGuests();
+  }, []);
 
   const filteredGuests = guests.filter((g) => {
     const q = search.toLowerCase().trim();
@@ -160,6 +118,11 @@ export const CustomersListPage: React.FC = () => {
       </div>
 
       {/* Table */}
+      {loading ? (
+        <div className="flex justify-center items-center h-40 text-slate-500 text-sm font-semibold">
+          Đang tải danh sách khách hàng...
+        </div>
+      ) : (
       <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-left border-collapse">
@@ -229,6 +192,7 @@ export const CustomersListPage: React.FC = () => {
           </table>
         </div>
       </div>
+      )}
 
       {/* Guest Drawer */}
       <Drawer

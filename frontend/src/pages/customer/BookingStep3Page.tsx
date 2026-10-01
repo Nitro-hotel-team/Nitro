@@ -125,6 +125,57 @@ export const BookingStep3Page: React.FC = () => {
           </div>
         </div>
 
+        {/* Manual Payment Instructions */}
+        {draftBooking?.paymentMethod === 'BANK_TRANSFER' && (
+          <div className="pt-4 border-t border-[#E2E8F0] max-w-md mx-auto">
+            <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 text-left space-y-3">
+              <h3 className="text-sm font-bold text-indigo-900 flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4" />
+                Hướng dẫn chuyển khoản
+              </h3>
+              <div className="text-xs text-indigo-800 space-y-1.5">
+                <div className="flex justify-between border-b border-indigo-100/50 pb-1.5">
+                  <span className="opacity-70">Ngân hàng:</span>
+                  <span className="font-bold">Vietcombank - CN Tân Định</span>
+                </div>
+                <div className="flex justify-between border-b border-indigo-100/50 pb-1.5">
+                  <span className="opacity-70">Chủ tài khoản:</span>
+                  <span className="font-bold">CTY TNHH KHÁCH SẠN NITRO</span>
+                </div>
+                <div className="flex justify-between border-b border-indigo-100/50 pb-1.5">
+                  <span className="opacity-70">Số tài khoản:</span>
+                  <span className="font-bold font-mono text-sm">0181001234567</span>
+                </div>
+                <div className="flex justify-between border-b border-indigo-100/50 pb-1.5">
+                  <span className="opacity-70">Số tiền:</span>
+                  <span className="font-bold text-red-600">{formatCurrency(draftBooking?.totalAmount || 0)}</span>
+                </div>
+                <div className="flex justify-between pt-0.5">
+                  <span className="opacity-70">Nội dung CK:</span>
+                  <span className="font-bold font-mono text-xs">{bookingCode}</span>
+                </div>
+              </div>
+              <p className="text-[11px] text-indigo-700/80 italic text-center pt-2">
+                * Đơn đặt phòng của quý khách sẽ được tự động xác nhận sau khi nhận được thanh toán (Tối đa 24h).
+              </p>
+            </div>
+          </div>
+        )}
+
+        {draftBooking?.paymentMethod === 'CASH' && (
+          <div className="pt-4 border-t border-[#E2E8F0] max-w-md mx-auto">
+            <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 text-center space-y-2">
+              <h3 className="text-sm font-bold text-emerald-900 flex justify-center items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4" />
+                Thanh toán tại quầy
+              </h3>
+              <p className="text-xs text-emerald-800">
+                Quý khách vui lòng thanh toán số tiền <strong className="text-red-600">{formatCurrency(draftBooking?.totalAmount || 0)}</strong> trực tiếp tại Lễ tân (bằng tiền mặt hoặc thẻ) trong quá trình làm thủ tục nhận phòng.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Booking Recap Details */}
         <div className="bg-slate-50 rounded-2xl p-5 text-left text-xs space-y-2.5 max-w-md mx-auto border border-slate-200">
           <div className="flex justify-between">

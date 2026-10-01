@@ -54,8 +54,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/common/Button';
 import { HoldCountdown } from '../../components/common/HoldCountdown';
 import { useApp } from '../../context/AppContext';
-import { MOCK_ROOM_TYPES, MOCK_SERVICES } from '../../mocks/data';
-import { ExtraServiceItem, HotelService } from '../../types';
+import { roomService, hotelServiceService } from '../../services/api';
+import { ExtraServiceItem, HotelService, RoomType } from '../../types';
 import { formatCurrency, formatDate } from '../../utils/format';
 
 // Quick tags for special requests
@@ -81,29 +81,31 @@ export const BookingStep1Page: React.FC = () => {
   const { draftBooking, setDraftBooking, currentUser, language, resetHoldCountdown } = useApp();
   const navigate = useNavigate();
 
-  // If no active draft booking, initialize a default 4-star room draft so user can test directly
+  const [loading, setLoading] = useState(true);
+  const [roomType, setRoomType] = useState<RoomType | null>(null);
+  const [services, setServices] = useState<HotelService[]>([]);
+
+  // Redirect if no active draft booking
   useEffect(() => {
     if (!draftBooking || !draftBooking.roomTypeId) {
-      const today = new Date();
-      const checkIn = new Date(today);
-      checkIn.setDate(today.getDate() + 1);
-      const checkOut = new Date(today);
-      checkOut.setDate(today.getDate() + 3);
-
-      const inStr = checkIn.toISOString().split('T')[0];
-      const outStr = checkOut.toISOString().split('T')[0];
-
-      setDraftBooking({
-        roomTypeId: 'rt-03',
-        roomTypeName: 'Deluxe City View',
-        checkInDate: inStr,
-        checkOutDate: outStr,
-        nights: 2,
-        adults: 2,
-        children: 0,
-        roomsCount: 1,
-        totalAmount: 1850000 * 2,
-      });
+      navigate('/rooms');
+    } else {
+      const fetchData = async () => {
+        try {
+          const [fetchedRoomType, fetchedServices] = await Promise.all([
+            roomService.getRoomTypeById(draftBooking.roomTypeId),
+            hotelServiceService.getServices()
+          ]);
+          setRoomType(fetchedRoomType);
+          setServices(fetchedServices);
+        } catch (error) {
+          console.error("Failed to load data", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      fetchData();
     }
     resetHoldCountdown();
   }, [draftBooking, setDraftBooking, resetHoldCountdown]);
@@ -116,19 +118,11 @@ export const BookingStep1Page: React.FC = () => {
     );
   }, [draftBooking?.roomTypeId]);
 
-  // Stay parameters
-  const nights = Math.max(1, draftBooking?.nights || 1);
-  const adults = Math.max(1, draftBooking?.adults || 2);
-  const children = draftBooking?.children || 0;
-  const [roomsCount, setRoomsCount] = useState<number>(draftBooking?.roomsCount || 1);
-
   // Form states
-  const [fullName, setFullName] = useState(draftBooking?.guestName || currentUser.name || '');
-  const [phone, setPhone] = useState(draftBooking?.guestPhone || currentUser.phone || '');
-  const [email, setEmail] = useState(draftBooking?.guestEmail || currentUser.email || '');
-  const [arrivalTime, setArrivalTime] = useState(
-    draftBooking?.estimatedArrivalTime || '14:00 - 16:00 (Tiêu chuẩn)'
-  );
+  const [fullName, setFullName] = useState(draftBooking?.guestName || currentUser?.name || '');
+  const [phone, setPhone] = useState(draftBooking?.guestPhone || currentUser?.phone || '');
+  const [email, setEmail] = useState(draftBooking?.guestEmail || currentUser?.email || '');
+  const [arrivalTime, setArrivalTime] = useState(draftBooking?.estimatedArrivalTime || '14:00 - 16:00');
   const [specialRequests, setSpecialRequests] = useState(draftBooking?.specialRequests || '');
 
   // Validation errors
@@ -154,22 +148,20 @@ export const BookingStep1Page: React.FC = () => {
   const [promoStatus, setPromoStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [promoMessage, setPromoMessage] = useState('');
 
-  // --------------------------------------------------------------------------
-  // FINANCIAL CALCULATIONS (BA/PO Formulas)
-  // --------------------------------------------------------------------------
-  const baseRoomTotal = roomType.basePrice * nights * roomsCount;
+  if (loading) {
+    return <div className="max-w-6xl mx-auto p-8 text-center text-slate-500 text-sm font-semibold">Đang tải dữ liệu đặt phòng...</div>;
+  }
+  
+  if (!roomType) {
+    return <div className="max-w-6xl mx-auto p-8 text-center text-rose-500 font-bold">Không tìm thấy thông tin loại phòng.</div>;
+  }
 
-  // Calculate discount on room total
-  const discountAmount = useMemo(() => {
-    if (!appliedPromo) return 0;
-    if (appliedPromo.rate > 0) {
-      return Math.round(baseRoomTotal * appliedPromo.rate);
-    }
-    if (appliedPromo.fixed > 0) {
-      return Math.min(appliedPromo.fixed, baseRoomTotal);
-    }
-    return 0;
-  }, [appliedPromo, baseRoomTotal]);
+  const nights = draftBooking?.nights || 1;
+  const baseRoomTotal = roomType.basePrice * nights;
+  const servicesTotal = selectedServices.reduce(
+    (sum, item) => sum + item.price * (item.quantity || 1),
+    0
+  );
 
   // Services Total (Price × Quantity for each add-on)
   const servicesTotal = useMemo(() => {
@@ -676,14 +668,9 @@ export const BookingStep1Page: React.FC = () => {
                 )}
               </div>
 
-              <div className="space-y-3">
-                {MOCK_SERVICES.map((svc) => {
-                  const selectedItem = selectedServices.find((s) => s.id === svc.id);
-                  const isChecked = !!selectedItem;
-                  const qty = selectedItem?.quantity || 1;
-                  const itemTotal = svc.price * qty;
-                  const cat = getServiceCategoryBadge(svc.id);
-
+              <div className="space-y-2.5">
+                {services.map((svc) => {
+                  const isChecked = selectedServices.some((s) => s.id === svc.id);
                   return (
                     <div
                       key={svc.id}

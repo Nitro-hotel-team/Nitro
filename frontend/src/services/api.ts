@@ -235,6 +235,31 @@ export const authService = {
   },
 
   /**
+   * Đăng nhập bằng Google
+   * @param credential Token từ Google
+   */
+  async loginWithGoogle(credential: string): Promise<LoginResponse> {
+    if (API_URL) {
+      const res = await fetch(`${API_URL}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential }),
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Lỗi đăng nhập bằng Google');
+      }
+      const data: LoginResponse = await res.json();
+      localStorage.setItem('auth_token', data.token);
+      localStorage.setItem('nitro_user_role', data.user.role);
+      localStorage.setItem('nitro_current_user', JSON.stringify(data.user));
+      return data;
+    }
+    await delay();
+    throw new Error('Chưa hỗ trợ đăng nhập Google ở chế độ Mock');
+  },
+
+  /**
    * [API 0.3] Lấy thông tin tài khoản hiện tại từ Token
    * -------------------------------------------------------------
    * @route GET /api/auth/me
@@ -322,6 +347,24 @@ export const roomService = {
    * @param id - Mã định danh hoặc mã code loại phòng (ví dụ: 'rt-dlx' hoặc 'DLX')
    * @returns Đối tượng RoomType hoặc null
    */
+  async uploadImage(file: File): Promise<{ url: string }> {
+    if (API_URL) {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch(`${API_URL}/api/upload`, {
+        method: 'POST',
+        // Notice we don't set Content-Type header manually here so the browser sets it with boundaries
+        headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
+        body: formData,
+      });
+      if (!res.ok) throw new Error('Không thể tải ảnh lên');
+      const data = await res.json();
+      return { url: `${API_URL}${data.url}` };
+    }
+    await delay();
+    return { url: URL.createObjectURL(file) };
+  },
+
   async getRoomTypeById(id: string): Promise<RoomType | null> {
     if (API_URL) {
       const res = await fetch(`${API_URL}/api/room-types/${encodeURIComponent(id)}`, {
@@ -334,6 +377,56 @@ export const roomService = {
     await delay();
     const rt = MOCK_ROOM_TYPES.find((t) => t.id === id || t.code.toLowerCase() === id.toLowerCase());
     return rt || null;
+  },
+
+  async createRoomType(data: Partial<RoomType>): Promise<RoomType> {
+    if (API_URL) {
+      const res = await fetch(`${API_URL}/api/room-types`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Không thể tạo hạng phòng');
+      }
+      return res.json();
+    }
+    await delay();
+    throw new Error('Chưa hỗ trợ tạo hạng phòng ở chế độ Mock');
+  },
+
+  async updateRoomType(id: string, data: Partial<RoomType>): Promise<RoomType> {
+    if (API_URL) {
+      const res = await fetch(`${API_URL}/api/room-types/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Không thể cập nhật hạng phòng');
+      }
+      return res.json();
+    }
+    await delay();
+    throw new Error('Chưa hỗ trợ sửa hạng phòng ở chế độ Mock');
+  },
+
+  async deleteRoomType(id: string): Promise<boolean> {
+    if (API_URL) {
+      const res = await fetch(`${API_URL}/api/room-types/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || 'Không thể xóa hạng phòng');
+      }
+      return true;
+    }
+    await delay();
+    throw new Error('Chưa hỗ trợ xóa hạng phòng ở chế độ Mock');
   },
 
   /**
@@ -422,6 +515,87 @@ export const roomService = {
       availableRooms: matchingRooms,
     };
   },
+
+  /**
+   * Tạo phòng mới (chỉ Admin/Manager)
+   */
+  async createRoom(data: { roomTypeId: string | number; number: string; floor: number }): Promise<Room> {
+    if (API_URL) {
+      const res = await fetch(`${API_URL}/api/rooms`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || 'Không thể tạo phòng');
+      }
+      return res.json();
+    }
+    await delay();
+    const newRoom = {
+      id: `room-${Date.now()}`,
+      number: data.number,
+      roomNumber: data.number,
+      floor: data.floor,
+      roomTypeId: String(data.roomTypeId),
+      status: 'AVAILABLE' as RoomStatus,
+      isClean: true,
+      roomTypeName: 'Phòng Mới',
+      roomTypeCode: 'NEW',
+    };
+    roomsState = [...roomsState, newRoom];
+    return newRoom;
+  },
+
+  /**
+   * Cập nhật thông tin phòng (chỉ Admin/Manager)
+   */
+  async updateRoom(id: string, data: { roomTypeId: string | number; number: string; floor: number }): Promise<Room> {
+    if (API_URL) {
+      const res = await fetch(`${API_URL}/api/rooms/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || 'Không thể cập nhật phòng');
+      }
+      return res.json();
+    }
+    await delay();
+    const idx = roomsState.findIndex(r => r.id === id);
+    if (idx === -1) throw new Error("Phòng không tồn tại");
+    roomsState[idx] = {
+      ...roomsState[idx],
+      number: data.number,
+      roomNumber: data.number,
+      floor: data.floor,
+      roomTypeId: String(data.roomTypeId)
+    };
+    return { ...roomsState[idx] };
+  },
+
+  /**
+   * Xóa mềm phòng (chỉ Admin)
+   */
+  async deleteRoom(id: string): Promise<boolean> {
+    if (API_URL) {
+      const res = await fetch(`${API_URL}/api/rooms/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || 'Không thể xóa phòng');
+      }
+      return true;
+    }
+    await delay();
+    roomsState = roomsState.filter(r => r.id !== id);
+    return true;
+  },
 };
 
 // ============================================================================
@@ -491,7 +665,11 @@ export const bookingService = {
         headers: getAuthHeaders(),
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error('Không thể khởi tạo đơn đặt phòng trên hệ thống');
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        const detail = errorData.detail || errorData.message || 'Không thể khởi tạo đơn đặt phòng trên hệ thống';
+        throw new Error(typeof detail === 'string' ? detail : JSON.stringify(detail));
+      }
       return res.json();
     }
 
