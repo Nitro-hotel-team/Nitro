@@ -28,13 +28,15 @@ def get_users(
     for nd in nguoi_dungs:
         vai_tro = db.query(VaiTro).filter(VaiTro.MaVT == nd.MaVT).first()
         kh = db.query(KhachHang).filter(KhachHang.MaNguoiDung == nd.MaNguoiDung).first()
+        name = kh.HoTen if kh else nd.TaiKhoan
         result.append({
             "id": str(nd.MaNguoiDung),
-            "name": kh.HoTen if kh else nd.TaiKhoan,
+            "name": name,
             "email": nd.Email,
             "phone": kh.SDT if kh else "",
             "role": role_to_en(vai_tro.TenVaiTro) if vai_tro else "CUSTOMER",
             "status": "ACTIVE" if nd.TrangThai else "LOCKED",
+            "avatar": f"https://ui-avatars.com/api/?name={name.replace(' ', '+')}&background=random",
         })
     return result
 
@@ -74,6 +76,7 @@ def create_user(
         "phone": body.phone,
         "role": body.role,
         "status": "ACTIVE",
+        "avatar": f"https://ui-avatars.com/api/?name={body.name.replace(' ', '+')}&background=random",
     }
 
 
@@ -101,7 +104,8 @@ def update_role(
         "name": nd.TaiKhoan,
         "email": nd.Email,
         "role": body.role,
-        "status": "ACTIVE" if nd.TrangThai else "LOCKED"
+        "status": "ACTIVE" if nd.TrangThai else "LOCKED",
+        "avatar": f"https://ui-avatars.com/api/?name={nd.TaiKhoan.replace(' ', '+')}&background=random",
     }
 
 
@@ -120,10 +124,14 @@ def update_status(
     nd.TrangThai = (body.status == "ACTIVE")
     db.commit()
     vai_tro = db.query(VaiTro).filter(VaiTro.MaVT == nd.MaVT).first()
+    kh = db.query(KhachHang).filter(KhachHang.MaNguoiDung == nd.MaNguoiDung).first()
+    name = kh.HoTen if kh else nd.TaiKhoan
     return {
         "id": str(nd.MaNguoiDung),
-        "name": nd.TaiKhoan,
+        "name": name,
         "email": nd.Email,
+        "phone": kh.SDT if kh else "",
         "role": role_to_en(vai_tro.TenVaiTro) if vai_tro else "CUSTOMER",
-        "status": body.status
+        "status": body.status,
+        "avatar": f"https://ui-avatars.com/api/?name={name.replace(' ', '+')}&background=random",
     }
