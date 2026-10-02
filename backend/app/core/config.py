@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     JWT_SECRET_KEY: str = "nitro-grand-hotel-secret-key-change-in-production-2026"
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 giờ
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7  # 7 ngày
 
     # --- CORS ---
     CORS_ORIGINS: str = '["http://localhost:3000","http://localhost:5173"]'
