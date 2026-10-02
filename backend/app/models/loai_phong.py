@@ -18,6 +18,7 @@ class LoaiPhong(Base):
     DienTich = Column(Integer, default=25, nullable=True)
     MoTa = Column(NVARCHAR(None), nullable=True)
     HinhAnh = Column(NVARCHAR(None), nullable=True)
+    TrangThai = Column(NVARCHAR(30), nullable=True, default="Hoạt động")
 
     # Relationships
     phongs = relationship("Phong", back_populates="loai_phong")
