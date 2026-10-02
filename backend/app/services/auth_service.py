@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.models.nguoi_dung import NguoiDung
 from app.models.vai_tro import VaiTro
 from app.models.khach_hang import KhachHang
-from app.core.security import hash_password, verify_password, create_access_token
+from app.core.security import hash_password, verify_password, create_access_token, create_refresh_token
 from app.core.status_mapping import role_to_en
 
 
@@ -105,15 +105,18 @@ def _build_user_response(db: Session, nguoi_dung: NguoiDung) -> dict:
     phone = khach_hang.SDT if khach_hang else ""
 
     # Tạo JWT token
-    token = create_access_token(data={
+    token_data = {
         "sub": str(nguoi_dung.MaNguoiDung),
         "userId": str(nguoi_dung.MaNguoiDung),
         "email": nguoi_dung.Email,
         "role": role_en,
-    })
+    }
+    token = create_access_token(data=token_data)
+    refresh_token = create_refresh_token(data={"sub": str(nguoi_dung.MaNguoiDung)})
 
     return {
         "token": token,
+        "refreshToken": refresh_token,
         "user": {
             "id": str(nguoi_dung.MaNguoiDung),
             "name": name,
@@ -122,6 +125,19 @@ def _build_user_response(db: Session, nguoi_dung: NguoiDung) -> dict:
             "role": role_en,
             "status": "ACTIVE" if nguoi_dung.TrangThai else "LOCKED",
             "lastLogin": None,
-            "avatar": None,
+            "avatar": f"https://ui-avatars.com/api/?name={name.replace(' ', '+')}&background=random",
         },
     }
+
+def change_user_password(db: Session, user_id: int, old_pw: str, new_pw: str) -> bool:
+    """Thay đổi mật khẩu người dùng."""
+    nguoi_dung = db.query(NguoiDung).filter(NguoiDung.MaNguoiDung == user_id).first()
+    if nguoi_dung is None:
+        raise ValueError("Người dùng không tồn tại")
+        
+    if not verify_password(old_pw, nguoi_dung.MatKhauHash):
+        raise ValueError("Mật khẩu hiện tại không đúng")
+        
+    nguoi_dung.MatKhauHash = hash_password(new_pw)
+    db.commit()
+    return True
