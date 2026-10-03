@@ -5,8 +5,8 @@ Endpoints: POST /api/auth/login, /register, GET /me, POST /logout
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.schemas.auth import LoginRequest, RegisterRequest, GoogleLoginRequest
-from app.services.auth_service import authenticate_user, register_user, get_user_by_id, _build_user_response
+from app.schemas.auth import LoginRequest, RegisterRequest, GoogleLoginRequest, RefreshRequest, ChangePasswordRequest
+from app.services.auth_service import authenticate_user, register_user, get_user_by_id, _build_user_response, change_user_password
 from app.middleware.auth import get_current_user
 from google.oauth2 import id_token
 from google.auth.transport import requests
@@ -15,7 +15,7 @@ import uuid
 from app.models.nguoi_dung import NguoiDung
 from app.models.vai_tro import VaiTro
 from datetime import date
-from app.core.security import hash_password
+from app.core.security import hash_password, decode_token
 from app.core.config import settings
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -104,6 +104,41 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
         )
 
 
+@router.post("/refresh")
+def refresh_token(request: RefreshRequest, db: Session = Depends(get_db)):
+    """Cấp lại access token mới bằng refresh token."""
+    payload = decode_token(request.refreshToken)
+    if not payload or payload.get("type") != "refresh":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token không hợp lệ hoặc đã hết hạn",
+        )
+    
+    user_id_str = payload.get("sub")
+    if not user_id_str:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token không hợp lệ",
+        )
+        
+    try:
+        user_id = int(user_id_str)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User ID không hợp lệ",
+        )
+        
+    user_info = get_user_by_id(db, user_id)
+    if not user_info:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Người dùng không tồn tại",
+        )
+        
+    return user_info
+
+
 @router.get("/me")
 def get_me(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     """Lấy thông tin tài khoản hiện tại từ JWT token."""
@@ -120,3 +155,16 @@ def get_me(current_user: dict = Depends(get_current_user), db: Session = Depends
 def logout(current_user: dict = Depends(get_current_user)):
     """Đăng xuất (client xóa token, server có thể blacklist nếu cần)."""
     return {"success": True, "message": "Đã đăng xuất thành công"}
+
+@router.post("/change-password")
+def change_password(request: ChangePasswordRequest, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Đổi mật khẩu người dùng."""
+    try:
+        user_id = int(current_user["userId"])
+        change_user_password(db, user_id, request.oldPassword, request.newPassword)
+        return {"success": True, "message": "Đổi mật khẩu thành công"}
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )

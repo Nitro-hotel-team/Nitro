@@ -5,12 +5,24 @@ Chuyển đổi trạng thái 2 chiều: Tiếng Việt (SQL Server) ↔ Tiếng
 # --- Trạng thái Phòng ---
 ROOM_STATUS_VI_TO_EN = {
     "Còn trống": "AVAILABLE",
+    "Trống": "AVAILABLE",
     "Đã đặt": "RESERVED",
     "Đang sử dụng": "OCCUPIED",
+    "Đang dọn dẹp": "CLEANING",
     "Bảo trì": "MAINTENANCE",
     "Xóa mềm": "DELETED",
 }
 ROOM_STATUS_EN_TO_VI = {v: k for k, v in ROOM_STATUS_VI_TO_EN.items()}
+# Bắt buộc EN_TO_VI phải map "AVAILABLE" thành "Trống" thay vì "Còn trống" vì key "Còn trống" bị override.
+# Let's fix EN_TO_VI properly:
+ROOM_STATUS_EN_TO_VI = {
+    "AVAILABLE": "Còn trống",
+    "RESERVED": "Đã đặt",
+    "OCCUPIED": "Đang sử dụng",
+    "CLEANING": "Đang dọn dẹp",
+    "MAINTENANCE": "Bảo trì",
+    "DELETED": "Xóa mềm",
+}
 
 # --- Trạng thái Đơn đặt phòng ---
 BOOKING_STATUS_VI_TO_EN = {

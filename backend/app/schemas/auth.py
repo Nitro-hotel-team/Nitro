@@ -1,8 +1,13 @@
 """
 Schemas: Authentication (Login, Register, Token, User response)
 """
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
+
+
+class ChangePasswordRequest(BaseModel):
+    oldPassword: str
+    newPassword: str = Field(..., min_length=6, description="Mật khẩu mới phải có ít nhất 6 ký tự")
 
 
 class LoginRequest(BaseModel):
@@ -26,8 +31,13 @@ class RegisterRequest(BaseModel):
     password: str
 
 
+class RefreshRequest(BaseModel):
+    refreshToken: str
+
+
 class TokenResponse(BaseModel):
     token: str
+    refreshToken: Optional[str] = None
     user: "UserResponse"
 
 

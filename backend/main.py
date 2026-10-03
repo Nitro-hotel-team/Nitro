@@ -17,7 +17,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from app.core.config import settings
-from app.core.database import test_connection
 from app.api.router import api_router
 
 # Import models để SQLAlchemy nhận diện
@@ -59,17 +58,6 @@ def root():
         "app": "Nitro Grand Hotel API",
         "version": "1.0.0",
         "docs": "/docs",
-    }
-
-
-@app.get("/health", tags=["Health"])
-def health():
-    db_ok = test_connection()
-    return {
-        "status": "healthy" if db_ok else "unhealthy",
-        "database": "connected" if db_ok else "disconnected",
-        "server": settings.DB_SERVER,
-        "database_name": settings.DB_NAME,
     }
 
 
