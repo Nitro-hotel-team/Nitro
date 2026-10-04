@@ -255,3 +255,25 @@ SELECT
 FROM THANH_TOAN tt
 WHERE tt.TinhTrang = 'Đã thanh toán'
 GROUP BY YEAR(tt.NgayThanhToan), MONTH(tt.NgayThanhToan);
+
+
+ALTER TABLE `NGUOI_DUNG`
+    ADD COLUMN `ResetOTP` VARCHAR(6) NULL AFTER `TrangThai`,
+    ADD COLUMN `ResetOTPExpiry` DATETIME NULL AFTER `ResetOTP`;
+
+ALTER TABLE `LOAI_PHONG`
+    ADD COLUMN `HinhAnh` VARCHAR(255) NULL;
+
+
+ALTER TABLE `LOAI_PHONG`
+    -- 1. Bổ sung các cột phụ thuộc vào HinhAnh
+    ADD COLUMN `SucChuaTreEm` INT NULL AFTER `HinhAnh`,
+    ADD COLUMN `DienTich` INT NULL AFTER `SucChuaTreEm`,
+    ADD COLUMN `TrangThai` VARCHAR(30) NULL AFTER `DienTich`,
+    ADD COLUMN `SoGiuong` VARCHAR(255) NULL AFTER `TrangThai`,
+    ADD COLUMN `TienIch` TEXT NOT NULL AFTER `SoGiuong`,
+
+    -- 2. Đổi thuộc tính các cột hiện có cho khớp thiết kế
+    MODIFY COLUMN `TenLoaiPhong` VARCHAR(255) NOT NULL,
+    MODIFY COLUMN `GiaThanh` DECIMAL(12, 2) NOT NULL,
+    MODIFY COLUMN `SucChua` INT NOT NULL;
