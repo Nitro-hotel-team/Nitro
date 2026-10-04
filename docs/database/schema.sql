@@ -277,3 +277,15 @@ ALTER TABLE `LOAI_PHONG`
     MODIFY COLUMN `TenLoaiPhong` VARCHAR(255) NOT NULL,
     MODIFY COLUMN `GiaThanh` DECIMAL(12, 2) NOT NULL,
     MODIFY COLUMN `SucChua` INT NOT NULL;
+
+
+ALTER TABLE `DON_DAT_PHONG`
+    -- 1. Bổ sung cột KenhDat
+    ADD COLUMN `KenhDat` VARCHAR(50) NULL AFTER `TongTien`,
+
+    -- 2. Cập nhật thuộc tính Allow Nulls cho NgayDat và TongTien
+    MODIFY COLUMN `NgayDat` DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
+    MODIFY COLUMN `TongTien` DECIMAL(12, 2) NULL DEFAULT 0.00,
+
+    -- 3. Xóa cột TienCoc (nếu không dùng nữa theo thiết kế)
+    DROP COLUMN `TienCoc`;
