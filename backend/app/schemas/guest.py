@@ -14,6 +14,15 @@ class GuestCreate(BaseModel):
     notes: Optional[str] = None
 
 
+class GuestUpdate(BaseModel):
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    idCardNumber: Optional[str] = None
+    nationality: Optional[str] = None
+    notes: Optional[str] = None
+
+
 class GuestResponse(BaseModel):
     id: str
     name: str
