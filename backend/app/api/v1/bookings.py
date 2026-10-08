@@ -61,8 +61,25 @@ def _build_booking_response(db: Session, ddp: DonDatPhong) -> dict:
     payment_method = None
     if thanh_toan:
         payment_status = payment_status_to_en(thanh_toan.TinhTrang) if thanh_toan.TinhTrang else "UNPAID"
-        paid_amount = float(thanh_toan.TongTien) if thanh_toan.TongTien else 0.0
-        payment_method = thanh_toan.PhuongThucThanhToan
+        if payment_status == "PAID" or thanh_toan.TinhTrang == "Đã thanh toán":
+            paid_amount = float(thanh_toan.TongTien) if thanh_toan.TongTien else 0.0
+        else:
+            paid_amount = 0.0
+        pm = thanh_toan.PhuongThucThanhToan
+        if pm in ("Tiền mặt", "Ti?n m?t", "CASH"):
+            payment_method = "Tiền mặt tại quầy"
+        elif pm in ("Chuyển khoản", "Chuy?n kho?n", "BANK_TRANSFER"):
+            payment_method = "Chuyển khoản ngân hàng"
+        elif pm == "CREDIT_CARD":
+            payment_method = "Thẻ quốc tế"
+        elif pm == "VNPAY":
+            payment_method = "Cổng VNPay"
+        elif pm == "MOMO":
+            payment_method = "Ví MoMo"
+        elif pm == "ZALOPAY":
+            payment_method = "Ví ZaloPay"
+        else:
+            payment_method = pm
 
     # Lấy dịch vụ
     su_dung_dvs = db.query(SuDungDV).filter(SuDungDV.MaDonDatPhong == ddp.MaDonDatPhong).all()
@@ -94,10 +111,12 @@ def _build_booking_response(db: Session, ddp: DonDatPhong) -> dict:
         "adults": 1,
         "children": 0,
         "totalAmount": float(ddp.TongTien) if ddp.TongTien else 0.0,
+        "depositAmount": float(ddp.TienCoc) if getattr(ddp, 'TienCoc', None) else 0.0,
+        "paymentOption": getattr(ddp, 'HinhThucThanhToan', 'FULL') or 'FULL',
         "paidAmount": paid_amount,
         "paymentStatus": payment_status,
         "status": booking_status_to_en(ddp.TinhTrangDon),
-        "source": "WEB",
+        "source": getattr(ddp, "KenhDat", "WEB") or "WEB",
         "createdAt": ddp.NgayDat.isoformat() if ddp.NgayDat else "",
         "specialRequests": None,
         "paymentMethod": payment_method,
@@ -109,6 +128,7 @@ def _build_booking_response(db: Session, ddp: DonDatPhong) -> dict:
 def get_bookings(
     search: str = Query(None),
     status: str = Query(None),
+    source: str = Query(None),
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
@@ -129,6 +149,9 @@ def get_bookings(
     if status:
         vi_status = booking_status_to_vi(status)
         query = query.filter(DonDatPhong.TinhTrangDon == vi_status)
+
+    if source:
+        query = query.filter(DonDatPhong.KenhDat == source)
 
     # Filter theo search
     if search:
@@ -204,58 +227,93 @@ def create_booking(
                 khach_hang.MaNguoiDung = current_user_id
                 db.commit()
 
-        # Tạo đơn đặt phòng
+        # 1. Tính toán ngày
         check_in_dt = datetime.strptime(body.checkInDate, "%Y-%m-%d")
         check_out_dt = datetime.strptime(body.checkOutDate, "%Y-%m-%d")
+        room_nights = max((check_out_dt - check_in_dt).days, 1)
 
+        # 2. Tìm phòng và khóa (Locking)
+        booked_rooms_subquery = db.query(ChiTietDatPhong.MaPhong).join(
+            DonDatPhong, ChiTietDatPhong.MaDonDatPhong == DonDatPhong.MaDonDatPhong
+        ).filter(
+            DonDatPhong.TinhTrangDon.notin_(["Đã hủy", "Từ chối"]),
+            DonDatPhong.NgayNhanPhong < check_out_dt,
+            DonDatPhong.NgayTraPhong > check_in_dt
+        ).subquery()
+
+        if body.roomNumber:
+            phong = db.query(Phong).filter(
+                Phong.SoPhong == body.roomNumber,
+                Phong.MaPhong.notin_(booked_rooms_subquery)
+            ).with_for_update().first()
+            if not phong:
+                raise HTTPException(status_code=400, detail=f"Phòng {body.roomNumber} không tồn tại hoặc đã có lịch đặt trong thời gian này.")
+        else:
+            phong = db.query(Phong).filter(
+                Phong.MaLoaiPhong == int(body.roomTypeId if body.roomTypeId else 0),
+                Phong.MaPhong.notin_(booked_rooms_subquery)
+            ).with_for_update().first()
+            if not phong:
+                raise HTTPException(status_code=400, detail="Không còn phòng trống cho loại phòng này trong khoảng thời gian đã chọn.")
+
+        # 3. Tính tiền phòng
+        loai_phong = db.query(LoaiPhong).filter(LoaiPhong.MaLoaiPhong == phong.MaLoaiPhong).first()
+        don_gia = float(loai_phong.GiaThanh) if loai_phong else 0.0
+        room_total = don_gia * room_nights
+
+        # 4. Tính tiền dịch vụ (Từ DB)
+        services_total = 0.0
+        valid_services = []
+        for svc in body.extraServices:
+            db_svc = db.query(DichVu).filter(DichVu.MaDV == int(svc.serviceId if svc.serviceId else 0)).first()
+            if db_svc:
+                svc_price = float(db_svc.GiaThanh)
+                services_total += svc_price * svc.quantity
+                valid_services.append({"id": db_svc.MaDV, "quantity": svc.quantity, "price": svc_price})
+
+        # 5. Tổng kết và tiền cọc (Cộng thêm 5% phí dịch vụ và 8% VAT = 13%)
+        subtotal = room_total + services_total
+        calculated_total = round(subtotal * 1.13)
+        if body.paymentOption == "DEPOSIT_30":
+            tien_coc = calculated_total * 0.3
+        else:
+            tien_coc = calculated_total
+
+        # 6. Tạo Đơn đặt phòng
         don_dat = DonDatPhong(
             MaKH=khach_hang.MaKH,
             NgayDat=datetime.now(),
             NgayNhanPhong=check_in_dt,
             NgayTraPhong=check_out_dt,
             TinhTrangDon="Chờ xác nhận",
-            TongTien=body.totalAmount or 0,
+            TongTien=calculated_total,
+            TienCoc=tien_coc,
+            HinhThucThanhToan=body.paymentOption or "FULL",
+            KenhDat=body.source,
         )
         db.add(don_dat)
         db.commit()
-        # Lấy lại đơn đặt phòng vừa tạo để có MaDonDatPhong
+        
         don_dat = db.query(DonDatPhong).filter(
             DonDatPhong.MaKH == khach_hang.MaKH
         ).order_by(DonDatPhong.MaDonDatPhong.desc()).first()
 
-        # Tìm phòng để thêm chi tiết
-        if body.roomNumber:
-            phong = db.query(Phong).filter(Phong.SoPhong == body.roomNumber).first()
-        else:
-            # Tìm phòng trống thuộc loại phòng
-            phong = db.query(Phong).filter(
-                Phong.MaLoaiPhong == int(body.roomTypeId if body.roomTypeId else 0),
-                Phong.TinhTrang == "Còn trống",
-            ).first()
+        # 7. Lưu chi tiết phòng và cập nhật trạng thái
+        chi_tiet = ChiTietDatPhong(
+            MaDonDatPhong=don_dat.MaDonDatPhong,
+            MaPhong=phong.MaPhong,
+            DonGia=don_gia,
+        )
+        db.add(chi_tiet)
+        phong.TinhTrang = "Đã đặt"
 
-        if phong:
-            loai_phong = db.query(LoaiPhong).filter(LoaiPhong.MaLoaiPhong == phong.MaLoaiPhong).first()
-            don_gia = float(loai_phong.GiaThanh) if loai_phong else body.totalAmount / max(body.nights, 1)
-
-            chi_tiet = ChiTietDatPhong(
-                MaDonDatPhong=don_dat.MaDonDatPhong,
-                MaPhong=phong.MaPhong,
-                DonGia=don_gia,
-            )
-            db.add(chi_tiet)
-            
-            # Cập nhật trạng thái phòng thành Đã đặt
-            phong.TinhTrang = "Đã đặt"
-            
-            db.commit()
-
-        # Thêm dịch vụ
-        for svc in body.extraServices:
+        # 8. Lưu chi tiết dịch vụ
+        for svc in valid_services:
             su_dung = SuDungDV(
                 MaDonDatPhong=don_dat.MaDonDatPhong,
-                MaDV=int(svc.serviceId if svc.serviceId else 0),
-                SoLuong=svc.quantity,
-                DonGia=svc.price,
+                MaDV=svc["id"],
+                SoLuong=svc["quantity"],
+                DonGia=svc["price"],
                 NgaySuDung=datetime.now(),
             )
             db.add(su_dung)
@@ -267,10 +325,13 @@ def create_booking(
         if body.paymentMethod in ("CASH", "BANK_TRANSFER"):
             thanh_toan = db.query(ThanhToan).filter(ThanhToan.MaDonDatPhong == don_dat.MaDonDatPhong).first()
             if thanh_toan:
-                thanh_toan.PhuongThucThanhToan = "Tiền mặt" if body.paymentMethod == "CASH" else "Chuyển khoản"
+                thanh_toan.PhuongThucThanhToan = body.paymentMethod
                 db.commit()
 
         return _build_booking_response(db, don_dat)
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
         db.rollback()
         import traceback
@@ -291,6 +352,63 @@ def update_booking_status(
         raise HTTPException(status_code=404, detail="Đơn đặt phòng không tồn tại")
 
     ddp.TinhTrangDon = booking_status_to_vi(body.status)
+    
+    # Update room status if a room is assigned
+    chi_tiets = db.query(ChiTietDatPhong).filter(ChiTietDatPhong.MaDonDatPhong == ddp.MaDonDatPhong).all()
+    if chi_tiets:
+        for ct in chi_tiets:
+            phong = db.query(Phong).filter(Phong.MaPhong == ct.MaPhong).first()
+            if phong:
+                if body.status == "CONFIRMED":
+                    phong.TinhTrang = "Đã đặt"
+                elif body.status == "CHECKED_IN":
+                    phong.TinhTrang = "Đang sử dụng"
+                elif body.status in ["CHECKED_OUT", "CANCELLED"]:
+                    phong.TinhTrang = "Còn trống"
+                    
+    db.commit()
+    return _build_booking_response(db, ddp)
+
+
+@router.patch("/{booking_id}/assign-room")
+def assign_room(
+    booking_id: str,
+    body: dict,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(require_roles("FRONT_DESK", "MANAGER", "ADMIN")),
+):
+    """Gán số phòng cho đặt phòng."""
+    ddp = db.query(DonDatPhong).filter(DonDatPhong.MaDonDatPhong == int(booking_id)).first()
+    if not ddp:
+        raise HTTPException(status_code=404, detail="Đơn đặt phòng không tồn tại")
+
+    room_id = body.get("roomId")
+    if not room_id:
+        raise HTTPException(status_code=400, detail="Vui lòng cung cấp roomId")
+
+    phong = db.query(Phong).filter(Phong.MaPhong == int(room_id)).first()
+    if not phong:
+        raise HTTPException(status_code=404, detail="Phòng không tồn tại")
+    
+    chi_tiet = db.query(ChiTietDatPhong).filter(ChiTietDatPhong.MaDonDatPhong == ddp.MaDonDatPhong).first()
+    if chi_tiet:
+        old_phong = db.query(Phong).filter(Phong.MaPhong == chi_tiet.MaPhong).first()
+        if old_phong:
+            old_phong.TinhTrang = "Còn trống"
+        chi_tiet.MaPhong = phong.MaPhong
+    else:
+        loai_phong = db.query(LoaiPhong).filter(LoaiPhong.MaLoaiPhong == phong.MaLoaiPhong).first()
+        nights = (ddp.NgayTraPhong - ddp.NgayNhanPhong).days
+        nights = max(nights, 1)
+        don_gia = float(loai_phong.GiaThanh) if loai_phong else float(ddp.TongTien or 0) / nights
+        chi_tiet = ChiTietDatPhong(
+            MaDonDatPhong=ddp.MaDonDatPhong,
+            MaPhong=phong.MaPhong,
+            DonGia=don_gia,
+        )
+        db.add(chi_tiet)
+
+    phong.TinhTrang = "Đã đặt"
     db.commit()
     return _build_booking_response(db, ddp)
 
@@ -308,5 +426,14 @@ def cancel_booking(
         raise HTTPException(status_code=404, detail="Đơn đặt phòng không tồn tại")
 
     ddp.TinhTrangDon = "Đã hủy"
+    
+    # Update room status back to available if a room is assigned
+    chi_tiets = db.query(ChiTietDatPhong).filter(ChiTietDatPhong.MaDonDatPhong == ddp.MaDonDatPhong).all()
+    if chi_tiets:
+        for ct in chi_tiets:
+            phong = db.query(Phong).filter(Phong.MaPhong == ct.MaPhong).first()
+            if phong:
+                phong.TinhTrang = "Còn trống"
+                
     db.commit()
     return _build_booking_response(db, ddp)

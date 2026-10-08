@@ -17,6 +17,9 @@ class DonDatPhong(Base):
     NgayTraPhong = Column(DateTime, nullable=False)
     TinhTrangDon = Column(Unicode(100), nullable=False)
     TongTien = Column(Numeric(12, 2), nullable=True)
+    TienCoc = Column(Numeric(12, 2), nullable=True, default=0)
+    HinhThucThanhToan = Column(String(50), nullable=True) # DEPOSIT_30, FULL
+    KenhDat = Column(Unicode(50), default="WEB")
 
     # Relationships
     khach_hang = relationship("KhachHang", back_populates="don_dat_phongs")

@@ -27,7 +27,10 @@ def create_vnpay_url(body: VNPayUrlRequest, db: Session = Depends(get_db)):
     vnp.requestData['vnp_Version'] = '2.1.0'
     vnp.requestData['vnp_Command'] = 'pay'
     vnp.requestData['vnp_TmnCode'] = settings.VNPAY_TMN_CODE
-    vnp.requestData['vnp_Amount'] = str(int(body.amount * 100))  # Nhân 100 theo VNPay
+    
+    # BẢO MẬT: Lấy TienCoc từ DB, bỏ qua amount từ client
+    tien_coc = float(don_dat.TienCoc) if don_dat.TienCoc else 0.0
+    vnp.requestData['vnp_Amount'] = str(int(tien_coc * 100))  # Nhân 100 theo VNPay
     vnp.requestData['vnp_CurrCode'] = 'VND'
     vnp.requestData['vnp_TxnRef'] = str(body.booking_id)
     vnp.requestData['vnp_OrderInfo'] = f"Thanh toan don dat phong {body.booking_id}"
@@ -36,7 +39,9 @@ def create_vnpay_url(body: VNPayUrlRequest, db: Session = Depends(get_db)):
     
     vnp.requestData['vnp_CreateDate'] = datetime.now().strftime('%Y%m%d%H%M%S')
     vnp.requestData['vnp_IpAddr'] = "127.0.0.1"
-    vnp.requestData['vnp_ReturnUrl'] = settings.VNPAY_RETURN_URL
+    
+    # Ép VNPAY trả kết quả về Backend thay vì Frontend
+    vnp.requestData['vnp_ReturnUrl'] = "http://localhost:5000/api/payments/vnpay_return"
     
     vnpay_payment_url = vnp.get_payment_url(settings.VNPAY_URL, settings.VNPAY_HASH_SECRET)
     return {"payment_url": vnpay_payment_url}
@@ -53,10 +58,18 @@ def vnpay_return(request: Request, db: Session = Depends(get_db)):
 
     if vnp.validate_response(settings.VNPAY_HASH_SECRET):
         if vnp_ResponseCode == "00":
-            # Giao dịch thành công
             actual_amount = int(amount) / 100
             
-            # Cập nhật bảng THANH_TOAN (trigger tự sinh, ta chỉ UPDATE)
+            don_dat = db.query(DonDatPhong).filter(DonDatPhong.MaDonDatPhong == int(order_id)).first()
+            if not don_dat:
+                return RedirectResponse(url=f"http://localhost:3000/booking/payment-result?status=error_not_found&bookingId={order_id}")
+            
+            # BẢO MẬT: Kiểm tra số tiền VNPAY trả về có khớp với tiền cọc không
+            tien_coc_db = float(don_dat.TienCoc) if don_dat.TienCoc else 0.0
+            if actual_amount < tien_coc_db:
+                return RedirectResponse(url=f"http://localhost:3000/booking/payment-result?status=error_invalid_amount&bookingId={order_id}")
+            
+            # Cập nhật bảng THANH_TOAN
             thanh_toan = db.query(ThanhToan).filter(ThanhToan.MaDonDatPhong == int(order_id)).first()
             if thanh_toan:
                 thanh_toan.TinhTrang = "Đã thanh toán"
@@ -65,19 +78,13 @@ def vnpay_return(request: Request, db: Session = Depends(get_db)):
                 thanh_toan.NgayThanhToan = datetime.now()
                 
             # Cập nhật bảng DON_DAT_PHONG thành 'Đã xác nhận'
-            don_dat = db.query(DonDatPhong).filter(DonDatPhong.MaDonDatPhong == int(order_id)).first()
-            if don_dat:
-                don_dat.TinhTrangDon = "Đã xác nhận"
+            don_dat.TinhTrangDon = "Đã xác nhận"
             
             db.commit()
-            # Dùng base URL từ VNPAY_RETURN_URL thay vì hardcode
-            base_url = settings.VNPAY_RETURN_URL.rsplit('/', 1)[0]
-            return RedirectResponse(url=f"{base_url}/payment-result?status=success&bookingId={order_id}")
+            return RedirectResponse(url=f"http://localhost:3000/booking/payment-result?status=success&bookingId={order_id}")
         else:
             # Giao dịch thất bại / Khách hủy giao dịch
-            base_url = settings.VNPAY_RETURN_URL.rsplit('/', 1)[0]
-            return RedirectResponse(url=f"{base_url}/payment-result?status=error&bookingId={order_id}")
+            return RedirectResponse(url=f"http://localhost:3000/booking/payment-result?status=error&bookingId={order_id}")
     else:
         # Lỗi bảo mật chữ ký
-        base_url = settings.VNPAY_RETURN_URL.rsplit('/', 1)[0]
-        return RedirectResponse(url=f"{base_url}/payment-result?status=invalid_signature")
+        return RedirectResponse(url=f"http://localhost:3000/booking/payment-result?status=invalid_signature")

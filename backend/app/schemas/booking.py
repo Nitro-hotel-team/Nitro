@@ -27,6 +27,7 @@ class BookingCreate(BaseModel):
     totalAmount: float
     paidAmount: float = 0
     paymentMethod: Optional[str] = None
+    paymentOption: Optional[str] = "FULL" # DEPOSIT_30, FULL
     paymentStatus: Optional[str] = None
     status: Optional[str] = None
     source: str = "WEB"
@@ -61,7 +62,9 @@ class BookingResponse(BaseModel):
     adults: int
     children: int
     totalAmount: float
+    depositAmount: float = 0
     paidAmount: float
+    paymentOption: Optional[str] = None
     paymentStatus: Optional[str] = "UNPAID"
     status: str
     source: str
