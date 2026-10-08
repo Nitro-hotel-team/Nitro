@@ -50,6 +50,18 @@ os.makedirs("uploads", exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 
+# --- Scheduler ---
+@app.on_event("startup")
+def startup_event():
+    from app.core.scheduler import start_scheduler
+    start_scheduler()
+
+@app.on_event("shutdown")
+def shutdown_event():
+    from app.core.scheduler import stop_scheduler
+    stop_scheduler()
+
+
 # --- Health Check ---
 @app.get("/", tags=["Health"])
 def root():
