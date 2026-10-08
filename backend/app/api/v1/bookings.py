@@ -242,15 +242,31 @@ def create_booking(
             DonDatPhong.MaKH == khach_hang.MaKH
         ).order_by(DonDatPhong.MaDonDatPhong.desc()).first()
 
-        # Tìm phòng để thêm chi tiết
+        # Tìm các phòng đã được đặt trong khoảng thời gian check-in -> check-out
+        booked_rooms_subquery = db.query(ChiTietDatPhong.MaPhong).join(
+            DonDatPhong, ChiTietDatPhong.MaDonDatPhong == DonDatPhong.MaDonDatPhong
+        ).filter(
+            DonDatPhong.TinhTrangDon.notin_(["Đã hủy", "Từ chối"]),
+            DonDatPhong.NgayNhanPhong < check_out_dt,
+            DonDatPhong.NgayTraPhong > check_in_dt
+        ).subquery()
+
+        # Tìm phòng để thêm chi tiết với cơ chế Lock (with_for_update) để tránh Race Condition
         if body.roomNumber:
-            phong = db.query(Phong).filter(Phong.SoPhong == body.roomNumber).first()
+            phong = db.query(Phong).filter(
+                Phong.SoPhong == body.roomNumber,
+                Phong.MaPhong.notin_(booked_rooms_subquery)
+            ).with_for_update().first()
+            if not phong:
+                raise HTTPException(status_code=400, detail=f"Phòng {body.roomNumber} không tồn tại hoặc đã có lịch đặt trong thời gian này.")
         else:
             # Tìm phòng trống thuộc loại phòng
             phong = db.query(Phong).filter(
                 Phong.MaLoaiPhong == int(body.roomTypeId if body.roomTypeId else 0),
-                Phong.TinhTrang == "Còn trống",
-            ).first()
+                Phong.MaPhong.notin_(booked_rooms_subquery)
+            ).with_for_update().first()
+            if not phong:
+                raise HTTPException(status_code=400, detail="Không còn phòng trống cho loại phòng này trong khoảng thời gian đã chọn.")
 
         if phong:
             loai_phong = db.query(LoaiPhong).filter(LoaiPhong.MaLoaiPhong == phong.MaLoaiPhong).first()
@@ -290,6 +306,9 @@ def create_booking(
                 db.commit()
 
         return _build_booking_response(db, don_dat)
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
         db.rollback()
         import traceback
