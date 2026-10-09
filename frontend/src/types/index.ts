@@ -161,6 +161,7 @@ export interface User {
   status?: 'ACTIVE' | 'LOCKED';
   lastLogin?: string;
   avatar?: string;
+  password?: string;
 }
 
 export interface HotelService {
