@@ -148,6 +148,7 @@ export interface Guest {
   totalSpent: number;
   totalStays?: number;
   totalBookings?: number;
+  totalNights?: number;
   vipTier?: string;
   lastStay?: string;
 }
