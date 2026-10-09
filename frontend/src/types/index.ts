@@ -159,6 +159,7 @@ export interface User {
   email: string;
   phone: string;
   role: UserRole;
+  employeeCode?: string;
   status?: 'ACTIVE' | 'LOCKED';
   lastLogin?: string;
   avatar?: string;
