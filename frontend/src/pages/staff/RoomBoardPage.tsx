@@ -148,30 +148,36 @@ export const RoomBoardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Status Legend Bar (Interactive filter chips with counts) */}
-      <div className="bg-white border border-[#E2E8F0] rounded-2xl p-3 shadow-xs flex items-center gap-2 overflow-x-auto pb-2 sm:pb-3 sm:flex-wrap text-xs">
-        <span className="text-[#475569] font-bold mr-1 shrink-0">Trạng thái:</span>
+      {/* 5+1 Interactive StatCards for PMS status overview (TASK-35) */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { key: 'ALL', label: 'Tất cả', count: counts.ALL, bg: 'bg-slate-100 text-slate-800' },
-          { key: 'AVAILABLE', label: 'Trống', count: counts.AVAILABLE, bg: 'bg-emerald-100 text-emerald-800' },
-          { key: 'OCCUPIED', label: 'Đang ở', count: counts.OCCUPIED, bg: 'bg-blue-100 text-blue-800' },
-          { key: 'RESERVED', label: 'Đã đặt trước', count: counts.RESERVED, bg: 'bg-amber-100 text-amber-800' },
-          { key: 'CLEANING', label: 'Đang dọn', count: counts.CLEANING, bg: 'bg-purple-100 text-purple-800' },
-          { key: 'MAINTENANCE', label: 'Bảo trì', count: counts.MAINTENANCE, bg: 'bg-rose-100 text-rose-800' },
+          { key: 'ALL', label: 'Tổng số phòng', count: counts.ALL, icon: <DoorOpen className="w-5 h-5 text-slate-700" />, bgActive: 'ring-2 ring-slate-800 bg-slate-50', textColor: 'text-slate-900' },
+          { key: 'AVAILABLE', label: 'Sẵn sàng đón', count: counts.AVAILABLE, icon: <CheckCircle2 className="w-5 h-5 text-emerald-600" />, bgActive: 'ring-2 ring-emerald-600 bg-emerald-50', textColor: 'text-emerald-700' },
+          { key: 'OCCUPIED', label: 'Đang có khách', count: counts.OCCUPIED, icon: <User className="w-5 h-5 text-blue-600" />, bgActive: 'ring-2 ring-blue-600 bg-blue-50', textColor: 'text-blue-700' },
+          { key: 'RESERVED', label: 'Đã đặt trước', count: counts.RESERVED, icon: <Clock className="w-5 h-5 text-amber-600" />, bgActive: 'ring-2 ring-amber-600 bg-amber-50', textColor: 'text-amber-700' },
+          { key: 'CLEANING', label: 'Chờ dọn dẹp', count: counts.CLEANING, icon: <Sparkles className="w-5 h-5 text-purple-600" />, bgActive: 'ring-2 ring-purple-600 bg-purple-50', textColor: 'text-purple-700' },
+          { key: 'MAINTENANCE', label: 'Khóa bảo trì', count: counts.MAINTENANCE, icon: <Wrench className="w-5 h-5 text-rose-600" />, bgActive: 'ring-2 ring-rose-600 bg-rose-50', textColor: 'text-rose-700' },
         ].map((item) => {
           const active = statusFilter === item.key;
           return (
             <button
               key={item.key}
+              type="button"
               onClick={() => setStatusFilter(item.key as any)}
-              className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition shrink-0 cursor-pointer ${
-                active ? 'ring-2 ring-[#1F5AA6] ' + item.bg : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+              className={`p-3 rounded-2xl bg-white border text-left transition transform hover:-translate-y-0.5 shadow-xs cursor-pointer flex flex-col justify-between ${
+                active ? item.bgActive + ' shadow-md' : 'border-[#E2E8F0] hover:border-slate-300'
               }`}
             >
-              <span className="whitespace-nowrap">{item.label}</span>
-              <span className="text-[10px] bg-white/80 px-1.5 py-0.2 rounded-full tabular-nums">
-                {item.count}
-              </span>
+              <div className="flex items-center justify-between mb-2">
+                <span className="p-2 rounded-xl bg-slate-50 border border-slate-100">{item.icon}</span>
+                <span className={`text-2xl font-black tabular-nums ${item.textColor}`}>{item.count}</span>
+              </div>
+              <div>
+                <div className="text-[11px] font-bold text-[#475569] truncate">{item.label}</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">
+                  {Math.round((item.count / (counts.ALL || 1)) * 100)}% tổng kho
+                </div>
+              </div>
             </button>
           );
         })}
@@ -293,14 +299,34 @@ export const RoomBoardPage: React.FC = () => {
                         {/* Status badge & detail */}
                         <div>
                           <StatusBadge status={room.status} type="room" size="sm" />
-                          {room.guestName && (
-                            <div className="text-[11px] font-bold text-[#0F172A] truncate mt-1">
-                              {room.guestName}
+                          {isOccupied && (
+                            <div className="mt-1">
+                              <div className="text-[11px] font-bold text-[#0F172A] truncate flex items-center gap-1">
+                                <User className="w-3 h-3 text-blue-600 shrink-0" />
+                                <span className="truncate">{room.guestName || 'Khách lưu trú'}</span>
+                              </div>
+                              <div className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
+                                <Clock className="w-3 h-3 text-slate-400 shrink-0" />
+                                <span>{room.checkoutTime || 'Trả: 12:00'}</span>
+                              </div>
+                            </div>
+                          )}
+                          {isReserved && (
+                            <div className="mt-1">
+                              <div className="text-[11px] font-bold text-[#0F172A] truncate">
+                                {room.guestName || 'Đã đặt trước'}
+                              </div>
+                              <div className="text-[10px] text-amber-700 font-semibold">Chờ nhận phòng</div>
                             </div>
                           )}
                           {isCleaning && (
-                            <div className="text-[10px] text-purple-700 flex items-center gap-1 mt-0.5">
-                              <Sparkles className="w-3 h-3" /> Đang dọn
+                            <div className="text-[10px] text-purple-700 flex items-center gap-1 mt-1 font-semibold">
+                              <Sparkles className="w-3 h-3" /> Chờ buồng dọn
+                            </div>
+                          )}
+                          {isMaintenance && (
+                            <div className="text-[10px] text-rose-700 flex items-center gap-1 mt-1 font-semibold">
+                              <Wrench className="w-3 h-3" /> Bảo trì thiết bị
                             </div>
                           )}
                         </div>
