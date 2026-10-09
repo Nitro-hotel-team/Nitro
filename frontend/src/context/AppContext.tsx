@@ -56,6 +56,9 @@ interface AppContextType {
   // Notifications
   unreadNotifications: number;
   markNotificationsRead: () => void;
+
+  // RBAC Permission helper
+  hasPermission: (allowedRoles: UserRole[]) => boolean;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -244,6 +247,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         clearDraftBooking,
         unreadNotifications,
         markNotificationsRead,
+        hasPermission: (allowedRoles: UserRole[]) => allowedRoles.includes(role),
       }}
     >
       {children}
