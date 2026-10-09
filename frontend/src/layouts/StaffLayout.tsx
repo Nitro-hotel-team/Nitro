@@ -45,8 +45,10 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '../components/common/Button';
+import { ForbiddenView } from '../components/common/ForbiddenView';
 import { useApp } from '../context/AppContext';
 import { UserRole } from '../types';
+import { canAccessRoute } from '../utils/rbac';
 
 interface MenuItem {
   title: string;
@@ -160,9 +162,7 @@ export const StaffLayout: React.FC = () => {
 
   // Check if current route is allowed for the active role (403 guard)
   const currentMenuItem = menuItems.find((item) => item.path === location.pathname);
-  const isForbidden =
-    role === 'CUSTOMER' ||
-    (currentMenuItem && !currentMenuItem.allowedRoles.includes(role));
+  const isForbidden = !canAccessRoute(location.pathname, role) || (currentMenuItem && !currentMenuItem.allowedRoles.includes(role));
 
   const handleLogout = async () => {
     await logout();
@@ -177,34 +177,10 @@ export const StaffLayout: React.FC = () => {
 
   if (isForbidden) {
     return (
-      <div className="min-h-screen bg-[#0B1F3A] flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-2xl border border-slate-700">
-          <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4 text-rose-600">
-            <ShieldCheck className="w-8 h-8" />
-          </div>
-          <h1 className="text-2xl font-bold text-[#0F172A] mb-2">403 — Không có quyền truy cập</h1>
-          <p className="text-sm text-[#475569] mb-6">
-            Vai trò hiện tại (<span className="font-bold text-[#1F5AA6]">{t(`role.${role}`)}</span>)
-            không được phép xem trang này. Vui lòng đăng nhập bằng tài khoản có thẩm quyền tương ứng (Lễ tân, Quản lý hoặc Quản trị viên).
-          </p>
-          <div className="flex flex-col gap-2">
-            <Button
-              variant="primary"
-              size="md"
-              onClick={() => navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`)}
-            >
-              Đăng nhập tài khoản nội bộ
-            </Button>
-            <Button
-              variant="outline"
-              size="md"
-              onClick={() => navigate('/')}
-            >
-              Về trang chủ khách hàng
-            </Button>
-          </div>
-        </div>
-      </div>
+      <ForbiddenView
+        currentRole={role}
+        requiredRoles={currentMenuItem?.allowedRoles}
+      />
     );
   }
 
