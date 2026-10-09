@@ -55,11 +55,12 @@ interface MenuItem {
   path: string;
   icon: React.ReactNode;
   allowedRoles: UserRole[];
+  category: 'FRONT_DESK' | 'MANAGER' | 'ADMIN';
 }
 
 export const StaffLayout: React.FC = () => {
   const { t } = useTranslation();
-  const { role, logout, currentUser, language, setLanguage, unreadNotifications, markNotificationsRead } = useApp();
+  const { role, setRole, logout, currentUser, language, setLanguage, unreadNotifications, markNotificationsRead } = useApp();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -67,8 +68,9 @@ export const StaffLayout: React.FC = () => {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [quickSearchQuery, setQuickSearchQuery] = useState('');
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
+  const [roleSwitcherOpen, setRoleSwitcherOpen] = useState(false);
 
-  // All menu items mapped by role permission (Cụm 2)
+  // All menu items mapped by role permission and grouped by operational area
   const menuItems: MenuItem[] = [
     // Front Desk (Lễ tân)
     {
@@ -76,30 +78,35 @@ export const StaffLayout: React.FC = () => {
       path: '/staff/overview',
       icon: <ClipboardList className="w-5 h-5" />,
       allowedRoles: ['FRONT_DESK', 'MANAGER', 'ADMIN'],
+      category: 'FRONT_DESK',
     },
     {
       title: t('nav.roomBoard'),
       path: '/staff/room-board',
       icon: <DoorOpen className="w-5 h-5" />,
       allowedRoles: ['FRONT_DESK', 'MANAGER', 'ADMIN'],
+      category: 'FRONT_DESK',
     },
     {
       title: t('nav.roomTimeline'),
       path: '/staff/timeline',
       icon: <Calendar className="w-5 h-5" />,
       allowedRoles: ['FRONT_DESK', 'MANAGER', 'ADMIN'],
+      category: 'FRONT_DESK',
     },
     {
       title: t('nav.bookingsList'),
       path: '/staff/bookings',
       icon: <FileText className="w-5 h-5" />,
       allowedRoles: ['FRONT_DESK', 'MANAGER', 'ADMIN'],
+      category: 'FRONT_DESK',
     },
     {
       title: t('nav.customers'),
       path: '/staff/customers',
       icon: <Users className="w-5 h-5" />,
       allowedRoles: ['FRONT_DESK', 'MANAGER', 'ADMIN'],
+      category: 'FRONT_DESK',
     },
 
     // Manager (Quản lý)
@@ -108,30 +115,35 @@ export const StaffLayout: React.FC = () => {
       path: '/staff/dashboard',
       icon: <LayoutDashboard className="w-5 h-5" />,
       allowedRoles: ['MANAGER', 'ADMIN'],
+      category: 'MANAGER',
     },
     {
       title: t('nav.roomTypes'),
       path: '/staff/room-types',
       icon: <Layers className="w-5 h-5" />,
       allowedRoles: ['MANAGER', 'ADMIN'],
+      category: 'MANAGER',
     },
     {
       title: t('nav.roomsManage'),
       path: '/staff/rooms',
       icon: <Hotel className="w-5 h-5" />,
       allowedRoles: ['MANAGER', 'ADMIN'],
+      category: 'MANAGER',
     },
     {
       title: t('nav.services'),
       path: '/staff/services',
       icon: <Utensils className="w-5 h-5" />,
       allowedRoles: ['MANAGER', 'ADMIN'],
+      category: 'MANAGER',
     },
     {
       title: t('nav.reports'),
       path: '/staff/reports',
       icon: <BarChart3 className="w-5 h-5" />,
       allowedRoles: ['MANAGER', 'ADMIN'],
+      category: 'MANAGER',
     },
 
     // Admin
@@ -140,18 +152,21 @@ export const StaffLayout: React.FC = () => {
       path: '/staff/users',
       icon: <ShieldCheck className="w-5 h-5" />,
       allowedRoles: ['ADMIN'],
+      category: 'ADMIN',
     },
     {
       title: t('nav.settings'),
       path: '/staff/settings',
       icon: <Settings className="w-5 h-5" />,
       allowedRoles: ['ADMIN'],
+      category: 'ADMIN',
     },
     {
       title: t('nav.auditLogs'),
       path: '/staff/logs',
       icon: <History className="w-5 h-5" />,
       allowedRoles: ['ADMIN'],
+      category: 'ADMIN',
     },
   ];
 
@@ -217,46 +232,104 @@ export const StaffLayout: React.FC = () => {
         </div>
 
         {/* Navigation list */}
-        <div className="flex-1 overflow-y-auto py-4 px-2 space-y-1">
-          {visibleMenuItems.map((item) => {
-            const active = location.pathname === item.path;
+        <div className="flex-1 overflow-y-auto py-4 px-2 space-y-3">
+          {(['FRONT_DESK', 'MANAGER', 'ADMIN'] as const).map((cat) => {
+            const catItems = visibleMenuItems.filter((item) => item.category === cat);
+            if (catItems.length === 0) return null;
+
+            const categoryLabels: Record<string, string> = {
+              FRONT_DESK: 'Vận hành Lễ tân',
+              MANAGER: 'Quản trị & Báo cáo',
+              ADMIN: 'Hệ thống & Bảo mật',
+            };
+
             return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors group ${
-                  active
-                    ? 'bg-[#1F5AA6] text-white shadow-xs'
-                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                }`}
-                title={collapsed ? item.title : undefined}
-              >
-                <span className={`shrink-0 ${active ? 'text-white' : 'text-slate-400 group-hover:text-white'}`}>
-                  {item.icon}
-                </span>
-                {!collapsed && <span className="truncate">{item.title}</span>}
-              </Link>
+              <div key={cat} className="space-y-1">
+                {!collapsed && (
+                  <div className="px-3 pt-1 pb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                    {categoryLabels[cat]}
+                  </div>
+                )}
+                {catItems.map((item) => {
+                  const active = location.pathname === item.path;
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold transition-colors group relative ${
+                        active
+                          ? 'bg-[#1F5AA6] text-white shadow-xs font-bold'
+                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                      }`}
+                      title={collapsed ? item.title : undefined}
+                    >
+                      <span className={`shrink-0 ${active ? 'text-white' : 'text-slate-400 group-hover:text-white'}`}>
+                        {item.icon}
+                      </span>
+                      {!collapsed && <span className="truncate">{item.title}</span>}
+                    </Link>
+                  );
+                })}
+              </div>
             );
           })}
         </div>
 
-        {/* Sidebar Footer */}
-        <div className="p-3 border-t border-slate-800">
-          <div className="flex items-center gap-3 p-2 rounded-lg bg-slate-900/60 border border-slate-800">
+        {/* Sidebar Footer with Fast Role Switcher */}
+        <div className="p-3 border-t border-slate-800 relative">
+          <div
+            onClick={() => setRoleSwitcherOpen(!roleSwitcherOpen)}
+            className="flex items-center gap-3 p-2 rounded-lg bg-slate-900/80 border border-slate-800 hover:border-slate-700 cursor-pointer transition select-none"
+            title="Nhấp để đổi nhanh vai trò kiểm thử (RBAC Switcher)"
+          >
             <img
               src={currentUser.avatar}
               alt={currentUser.name}
-              className="w-8 h-8 rounded-full object-cover shrink-0"
+              className="w-8 h-8 rounded-full object-cover shrink-0 ring-1 ring-slate-700"
             />
             {!collapsed && (
               <div className="flex-1 min-w-0">
-                <div className="text-xs font-bold text-white truncate">{currentUser.name}</div>
-                <div className="text-[10px] text-[#C9A227] font-semibold uppercase">
+                <div className="text-xs font-bold text-white truncate flex items-center justify-between">
+                  <span>{currentUser.name}</span>
+                  <span className="text-[10px] text-slate-400">▼</span>
+                </div>
+                <div className="text-[10px] text-[#C9A227] font-semibold uppercase tracking-wider">
                   {t(`role.${role}`)}
                 </div>
               </div>
             )}
           </div>
+
+          {/* Role Switcher Popover */}
+          {roleSwitcherOpen && (
+            <>
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setRoleSwitcherOpen(false)}
+              />
+              <div className="absolute bottom-20 left-3 right-3 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 text-xs">
+                <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider px-2 py-1 border-b border-slate-800 mb-1">
+                  Chuyển đổi Vai trò (Demo RBAC)
+                </div>
+                {(['FRONT_DESK', 'MANAGER', 'ADMIN'] as const).map((r) => (
+                  <button
+                    key={r}
+                    onClick={() => {
+                      setRole(r);
+                      setRoleSwitcherOpen(false);
+                    }}
+                    className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between transition cursor-pointer ${
+                      role === r ? 'bg-[#1F5AA6] text-white font-bold' : 'text-slate-300 hover:bg-slate-800'
+                    }`}
+                  >
+                    <span>{t(`role.${r}`)}</span>
+                    {role === r && <span className="text-xs">✓</span>}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+
           <Link
             to="/"
             className="mt-2 w-full flex items-center justify-center gap-2 py-1.5 text-xs text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition"
