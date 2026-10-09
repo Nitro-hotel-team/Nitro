@@ -676,9 +676,17 @@ export const bookingService = {
     // Fallback logic mô phỏng
     await delay();
     const roomType = MOCK_ROOM_TYPES.find((rt) => rt.id === data.roomTypeId) || MOCK_ROOM_TYPES[0];
-    const timestamp = Date.now().toString().slice(-4);
-    const dateCode = new Date().toISOString().slice(2, 10).replace(/-/g, '');
-    const bookingCode = `NTR-${dateCode}-${timestamp}`;
+    let bookingCode = data.bookingCode;
+    if (!bookingCode) {
+      if (data.source === 'COUNTER') {
+        const randomNum = Math.floor(100000 + Math.random() * 900000);
+        bookingCode = `WK-${randomNum}`;
+      } else {
+        const timestamp = Date.now().toString().slice(-4);
+        const dateCode = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+        bookingCode = `NTR-${dateCode}-${timestamp}`;
+      }
+    }
 
     const newBooking: Booking = {
       id: `bk-${Date.now()}`,
@@ -709,7 +717,9 @@ export const bookingService = {
     bookingsState = [newBooking, ...bookingsState];
 
     if (newBooking.roomNumber) {
-      const roomIdx = roomsState.findIndex((r) => r.number === newBooking.roomNumber);
+      const roomIdx = roomsState.findIndex(
+        (r) => r.number === newBooking.roomNumber || r.roomNumber === newBooking.roomNumber || r.id === newBooking.roomNumber
+      );
       if (roomIdx !== -1) {
         roomsState[roomIdx] = {
           ...roomsState[roomIdx],
