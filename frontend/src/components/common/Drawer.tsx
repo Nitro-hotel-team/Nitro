@@ -59,22 +59,22 @@ export const Drawer: React.FC<DrawerProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
-      {/* Backdrop */}
+      {/* Backdrop (DoD 1: Backdrop Blur & Fade-in) */}
       <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity animate-in fade-in"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-out animate-in fade-in"
         onClick={onClose}
       />
 
       <div className="fixed inset-y-0 right-0 flex max-w-full pl-10">
         <div
-          className={`w-screen ${widthClass} transform transition ease-in-out duration-200 bg-white shadow-2xl flex flex-col`}
+          className={`w-screen ${widthClass} transform transition ease-out duration-300 bg-white shadow-2xl flex flex-col animate-in slide-in-from-right`}
         >
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] bg-white shrink-0">
             <div className="text-lg font-bold text-[#0F172A]">{title}</div>
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all duration-200 hover:rotate-90 cursor-pointer"
               aria-label="Đóng thanh trượt"
             >
               <X className="w-5 h-5" />
