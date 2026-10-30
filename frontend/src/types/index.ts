@@ -148,6 +148,7 @@ export interface Guest {
   totalSpent: number;
   totalStays?: number;
   totalBookings?: number;
+  totalNights?: number;
   vipTier?: string;
   lastStay?: string;
 }
@@ -158,6 +159,7 @@ export interface User {
   email: string;
   phone: string;
   role: UserRole;
+  employeeCode?: string;
   status?: 'ACTIVE' | 'LOCKED';
   lastLogin?: string;
   avatar?: string;
@@ -214,3 +216,58 @@ export interface DashboardStats {
 }
 
 export interface DashboardMetrics extends DashboardStats {}
+
+// ==========================================
+// 7. Ca trực & Cài đặt & Báo cáo (Sprint 4: Dual-Mode Services)
+// ==========================================
+export interface Shift {
+  id: string;
+  shiftCode: string;
+  employeeName: string;
+  employeeCode: string;
+  startTime: string;
+  endTime?: string;
+  initialCash: number;
+  cashRevenue: number;
+  transferRevenue: number;
+  totalRevenue: number;
+  checkInCount: number;
+  checkOutCount: number;
+  status: 'OPEN' | 'CLOSED';
+  notes?: string;
+  actualCash?: number;
+  discrepancy?: number;
+}
+
+export type ShiftInfo = Shift;
+
+export interface SystemSettings {
+  hotelName: string;
+  hotline: string;
+  email: string;
+  address: string;
+  checkInTime: string;
+  checkOutTime: string;
+  vatRate: number;
+  serviceFeeRate: number;
+  currency: string;
+  lateCheckOutPenaltyHourlyRate?: number;
+  cancellationPolicyHours?: number;
+}
+
+export type SystemSetting = SystemSettings;
+
+export interface RevenueReportPoint {
+  time: string;
+  revenue: number;
+  roomRevenue: number;
+  serviceRevenue: number;
+}
+
+export interface RoomTypeRevenueContribution {
+  code: string;
+  name: string;
+  revenue: number;
+  percentage: number;
+  color: string;
+}
