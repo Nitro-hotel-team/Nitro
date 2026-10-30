@@ -710,9 +710,8 @@ export const bookingService = {
             const randomNum = Math.floor(100000 + Math.random() * 900000);
             bookingCode = `WK-${randomNum}`;
           } else {
-            const timestamp = Date.now().toString().slice(-4);
-            const dateCode = new Date().toISOString().slice(2, 10).replace(/-/g, '');
-            bookingCode = `NTR-${dateCode}-${timestamp}`;
+            const randomNum = Math.floor(100000 + Math.random() * 900000);
+            bookingCode = `BK-${randomNum}`;
           }
         }
 

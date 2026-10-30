@@ -14,7 +14,8 @@
     "test:task-58": "tsx scripts/test-task-58.ts",
     "test:task-59": "tsx scripts/test-task-59.ts",
     "test:task-60": "tsx scripts/test-task-60.ts",
-    "test:task-61": "tsx scripts/test-task-61.ts"
+    "test:task-61": "tsx scripts/test-task-61.ts",
+    "test:task-62": "tsx scripts/test-task-62.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
