@@ -130,3 +130,4 @@ npm run build
 npm run preview
 ```
 *Tất cả lệnh phải báo màu xanh lá (0 Failure) trước khi đưa lên môi trường sản xuất.*
+
