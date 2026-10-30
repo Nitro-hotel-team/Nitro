@@ -15,7 +15,7 @@
  * ============================================================================
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Calendar,
   Globe,
@@ -32,6 +32,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { DemoSwitcher } from '../components/common/DemoSwitcher';
 
 export const CustomerLayout: React.FC = () => {
   const { t } = useTranslation();
@@ -39,6 +40,18 @@ export const CustomerLayout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Khóa cuộn trang khi menu Drawer di động đang mở (TASK-59)
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const isEn = language === 'en';
@@ -68,6 +81,9 @@ export const CustomerLayout: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Demo RBAC Switcher (TASK-57) */}
+            <DemoSwitcher variant="header" />
+
             {/* Language Switcher */}
             <div className="flex items-center gap-1 font-semibold text-xs">
               <button
@@ -261,17 +277,18 @@ export const CustomerLayout: React.FC = () => {
             </div>
           </div>
 
-          {/* Mobile & Tablet menu trigger (visible on screen < 1024px) */}
+          {/* Mobile & Tablet menu trigger (visible on screen < 1024px, TASK-59) */}
           <div className="flex lg:hidden items-center gap-2 sm:gap-3">
             <Link
               to="/rooms"
-              className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#1F5AA6] text-white hover:bg-[#184A8A] transition shadow-xs whitespace-nowrap"
+              className="px-3 py-2 text-xs font-semibold rounded-lg bg-[#1F5AA6] text-white hover:bg-[#184A8A] transition shadow-xs whitespace-nowrap min-h-[44px] flex items-center justify-center"
             >
               {t('room.bookNow')}
             </Link>
             <button
+              type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg text-slate-700 hover:bg-slate-100 transition"
+              className="p-2 rounded-xl text-slate-700 hover:bg-slate-100 transition cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center border border-slate-200"
               aria-label={isEn ? "Open navigation menu" : "Mở menu điều hướng"}
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -279,35 +296,35 @@ export const CustomerLayout: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile & Tablet menu drawer */}
+        {/* Mobile & Tablet menu drawer (TASK-59: Apple HIG >=44px Touch Targets) */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-white border-b border-[#E2E8F0] px-4 pt-2 pb-6 space-y-3 animate-in slide-in-from-top-2 shadow-lg">
+          <div className="lg:hidden bg-white border-b border-[#E2E8F0] px-4 pt-2 pb-6 space-y-2 animate-in slide-in-from-top-2 shadow-xl max-h-[80vh] overflow-y-auto">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`block px-3 py-2 rounded-lg text-base font-semibold ${
+                className={`flex items-center min-h-[44px] px-3 py-2.5 rounded-xl text-sm font-semibold transition ${
                   location.pathname === link.path
-                    ? 'bg-[#EAF2FB] text-[#1F5AA6]'
+                    ? 'bg-[#EAF2FB] text-[#1F5AA6] font-bold'
                     : 'text-[#0F172A] hover:bg-slate-50'
                 }`}
               >
                 {link.label}
               </Link>
             ))}
-            <div className="pt-3 border-t border-[#E2E8F0] space-y-2">
+            <div className="pt-3 border-t border-[#E2E8F0] space-y-2.5">
               <Link
                 to="/rooms"
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full py-2.5 bg-[#1F5AA6] text-white font-bold rounded-lg text-center block shadow-sm hover:bg-[#184A8A] transition"
+                className="w-full min-h-[44px] py-2.5 bg-[#1F5AA6] text-white font-bold rounded-xl text-center flex items-center justify-center shadow-sm hover:bg-[#184A8A] transition text-sm"
               >
                 {t('room.bookNow')}
               </Link>
               <Link
                 to="/profile"
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full py-2 border border-[#E2E8F0] text-[#0F172A] font-semibold rounded-lg text-center block hover:bg-slate-50 transition"
+                className="w-full min-h-[44px] py-2 border border-[#E2E8F0] text-[#0F172A] font-semibold rounded-xl text-center flex items-center justify-center hover:bg-slate-50 transition text-sm"
               >
                 {t('nav.profile')} ({currentUser.name})
               </Link>
@@ -316,7 +333,7 @@ export const CustomerLayout: React.FC = () => {
                 <Link
                   to="/staff/overview"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full py-2 bg-amber-50 border border-amber-200 text-amber-800 font-bold rounded-lg text-center flex items-center justify-center gap-1.5 hover:bg-amber-100 transition text-sm"
+                  className="w-full min-h-[44px] py-2 bg-amber-50 border border-amber-200 text-amber-800 font-bold rounded-xl text-center flex items-center justify-center gap-1.5 hover:bg-amber-100 transition text-sm"
                 >
                   <ShieldCheck className="w-4 h-4 text-amber-600" />
                   {t('footer.staffPortalTitle')}
@@ -330,20 +347,26 @@ export const CustomerLayout: React.FC = () => {
                   await logout();
                   navigate('/login');
                 }}
-                className="w-full py-2 border border-rose-200 text-rose-600 font-semibold rounded-lg text-center flex items-center justify-center gap-1.5 hover:bg-rose-50 transition text-sm cursor-pointer"
+                className="w-full min-h-[44px] py-2 border border-rose-200 text-rose-600 font-semibold rounded-xl text-center flex items-center justify-center gap-1.5 hover:bg-rose-50 transition text-sm cursor-pointer"
               >
                 <LogOut className="w-4 h-4" />
                 {t('nav.logout')}
               </button>
 
+              {/* Demo Switcher row inside mobile menu */}
+              <div className="flex items-center justify-between pt-2 px-1 text-xs border-t border-slate-100">
+                <span className="text-slate-500 font-medium">Demo RBAC:</span>
+                <DemoSwitcher variant="header" />
+              </div>
+
               {/* Language switcher inside mobile menu */}
-              <div className="flex items-center justify-between pt-2 px-1 text-xs text-slate-500">
+              <div className="flex items-center justify-between pt-1 px-1 text-xs text-slate-500">
                 <span>{t('footer.selectLanguage')}</span>
-                <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg">
+                <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
                   <button
                     type="button"
                     onClick={() => setLanguage('vi')}
-                    className={`px-2 py-1 rounded text-xs font-bold transition ${
+                    className={`min-h-[36px] px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
                       language === 'vi' ? 'bg-[#1F5AA6] text-white shadow-xs' : 'text-slate-600'
                     }`}
                   >
@@ -352,7 +375,7 @@ export const CustomerLayout: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setLanguage('en')}
-                    className={`px-2 py-1 rounded text-xs font-bold transition ${
+                    className={`min-h-[36px] px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
                       language === 'en' ? 'bg-[#1F5AA6] text-white shadow-xs' : 'text-slate-600'
                     }`}
                   >

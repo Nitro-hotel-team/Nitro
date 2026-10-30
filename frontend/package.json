@@ -9,7 +9,10 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "test:smoke": "tsx scripts/smoke-test.ts"
+    "test:smoke": "tsx scripts/smoke-test.ts",
+    "test:task-57": "tsx scripts/test-task-57.ts",
+    "test:task-58": "tsx scripts/test-task-58.ts",
+    "test:task-59": "tsx scripts/test-task-59.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
