@@ -109,7 +109,7 @@ export const BookingTimelinePage: React.FC = () => {
   const todayStr = today.toISOString().slice(0, 10);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-x-hidden">
       {/* Top Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -204,7 +204,7 @@ export const BookingTimelinePage: React.FC = () => {
 
       {/* Gantt Timeline Board */}
       <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-xs overflow-hidden">
-        <div className="overflow-x-auto max-h-[650px]">
+        <div className="overflow-x-auto max-h-[650px] w-full max-w-full touch-pan-x">
           <table className="w-full border-collapse text-xs">
             <thead className="sticky top-0 z-30">
               <tr className="bg-slate-100 border-b border-[#E2E8F0]">

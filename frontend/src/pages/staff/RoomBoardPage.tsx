@@ -171,7 +171,7 @@ export const RoomBoardPage: React.FC = () => {
     : null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-x-hidden">
       {/* Page Title & Fast Walk-in */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

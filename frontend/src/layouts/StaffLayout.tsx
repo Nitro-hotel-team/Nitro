@@ -16,7 +16,7 @@
  * ============================================================================
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   BarChart3,
   Bell,
@@ -67,6 +67,18 @@ export const StaffLayout: React.FC = () => {
 
   const [collapsed, setCollapsed] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+
+  // Khóa cuộn trang khi menu Drawer di động của nhân viên đang mở (TASK-59)
+  useEffect(() => {
+    if (mobileDrawerOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileDrawerOpen]);
   const [quickSearchQuery, setQuickSearchQuery] = useState('');
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
 
@@ -305,8 +317,9 @@ export const StaffLayout: React.FC = () => {
           {/* Left: Mobile drawer button & Quick Search */}
           <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 max-w-xl">
             <button
+              type="button"
               onClick={() => setMobileDrawerOpen(true)}
-              className="lg:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100 shrink-0 cursor-pointer"
+              className="lg:hidden p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 border border-slate-200 shrink-0 cursor-pointer transition"
               aria-label="Mở menu nhân viên"
             >
               <Menu className="w-5 h-5" />
@@ -428,50 +441,62 @@ export const StaffLayout: React.FC = () => {
         </main>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Drawer (TASK-59: Apple HIG >=44px Touch Targets & Demo Switcher) */}
       {mobileDrawerOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div
-            className="fixed inset-0 bg-black/50"
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs animate-in fade-in"
             onClick={() => setMobileDrawerOpen(false)}
           />
-          <div className="fixed inset-y-0 left-0 w-72 bg-[#0B1F3A] text-white flex flex-col shadow-2xl p-4">
+          <div className="fixed inset-y-0 left-0 w-80 max-w-[85vw] bg-[#0B1F3A] text-white flex flex-col shadow-2xl p-4 animate-in slide-in-from-left">
             <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <Hotel className="w-6 h-6 text-[#C9A227]" />
-                <span className="font-bold text-sm text-white">NITRO GRAND HOTEL</span>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1F5AA6] to-slate-900 flex items-center justify-center text-[#C9A227] ring-1 ring-slate-700">
+                  <Hotel className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="font-bold text-sm text-white block">NITRO GRAND HOTEL</span>
+                  <span className="text-[10px] text-amber-400 font-semibold uppercase tracking-wider">Staff PMS Portal</span>
+                </div>
               </div>
               <button
+                type="button"
                 onClick={() => setMobileDrawerOpen(false)}
-                className="p-1 rounded text-slate-400 hover:text-white"
+                className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer"
+                aria-label="Đóng menu"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto py-4 space-y-1">
+            {/* Mobile RBAC Demo Switcher */}
+            <div className="py-3 border-b border-slate-800">
+              <DemoSwitcher variant="sidebar" />
+            </div>
+
+            <div className="flex-1 overflow-y-auto py-3 space-y-1">
               {visibleMenuItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
                   onClick={() => setMobileDrawerOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold ${
+                  className={`flex items-center min-h-[44px] gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition ${
                     location.pathname === item.path
-                      ? 'bg-[#1F5AA6] text-white'
-                      : 'text-slate-300 hover:bg-slate-800'
+                      ? 'bg-[#1F5AA6] text-white font-bold shadow-xs'
+                      : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
                   }`}
                 >
-                  {item.icon}
-                  <span>{item.title}</span>
+                  <span className="shrink-0">{item.icon}</span>
+                  <span className="truncate">{item.title}</span>
                 </Link>
               ))}
             </div>
 
-            <div className="pt-4 border-t border-slate-800 space-y-2">
+            <div className="pt-3 border-t border-slate-800 space-y-2">
               <Button
                 variant="gold"
                 size="md"
-                className="w-full"
+                className="w-full min-h-[44px] font-bold"
                 onClick={() => {
                   setMobileDrawerOpen(false);
                   navigate('/staff/walk-in');
@@ -482,7 +507,7 @@ export const StaffLayout: React.FC = () => {
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full bg-slate-900 border-slate-700 text-white"
+                className="w-full min-h-[44px] bg-slate-900 border-slate-700 text-white font-medium"
                 onClick={() => {
                   setMobileDrawerOpen(false);
                   navigate('/');
@@ -493,7 +518,7 @@ export const StaffLayout: React.FC = () => {
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full bg-rose-950/30 border-rose-800/60 text-rose-300 hover:bg-rose-900/50"
+                className="w-full min-h-[44px] bg-rose-950/30 border-rose-800/60 text-rose-300 hover:bg-rose-900/50 font-medium"
                 onClick={() => {
                   setMobileDrawerOpen(false);
                   handleLogout();
