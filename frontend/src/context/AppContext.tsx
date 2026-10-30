@@ -3,16 +3,22 @@
  * TÊN FILE: AppContext.tsx
  * VỊ TRÍ: src/context/AppContext.tsx
  * PHÂN HỆ: Quản trị Trạng thái Toàn cục (Global State Management)
+ * MÃ TASK: TASK-57 (Jira: FE-S4-01) - Sprint 4
  * ----------------------------------------------------------------------------
  * TỔNG QUAN VÀ NGUYÊN LÝ HOẠT ĐỘNG:
  * - Cung cấp kho dữ liệu tập trung (React Context) quản lý phiên làm việc toàn hệ thống.
  * - Quản lý Phân quyền người dùng hiện tại (CUSTOMER, FRONT_DESK, MANAGER, ADMIN)
- *   hỗ trợ lưu trữ phiên làm việc bền vững qua localStorage và xác thực tài khoản.
- * - Quản lý Đa ngôn ngữ (VI / EN) đồng bộ cùng i18next và localStorage.
- * - Quản lý Đồng hồ đếm ngược giữ phòng tạm thời (Hold Countdown Timer, mặc định 10 phút)
+ *   hỗ trợ lưu trữ phiên làm việc bền vững qua localStorage cho 4 khóa cốt lõi:
+ *   1. auth_token: JWT Token xác thực phiên đăng nhập.
+ *   2. nitro_user_role: Vai trò hiện tại (CUSTOMER, FRONT_DESK, MANAGER, ADMIN).
+ *   3. nitro_user_info: Dữ liệu hồ sơ người dùng đầy đủ (User DTO).
+ *   4. nitro_language: Ngôn ngữ hiển thị ưu tiên ('vi' | 'en').
+ * - Lưu trữ thông tin đơn đặt phòng nháp (draftBooking) bền vững qua các bước Checkout
+ *   (BookingStep1Page -> BookingStep2Page -> BookingStep3Page) chống mất dữ liệu khi tải lại trang.
+ * - Quản lý Đồng hồ đếm ngược giữ phòng tạm thời (Hold Countdown Timer, 10 phút)
  *   nhằm bảo vệ phòng tránh tình trạng đặt trùng lặp (Double Booking).
  * - Giả lập Xung đột phòng (Conflict Simulation) phục vụ kiểm thử phản ứng của hệ thống.
- * - Lưu trữ thông tin đơn đặt phòng nháp (draftBooking) qua các bước Checkout Step 1 -> 2 -> 3.
+ * - Tích hợp bộ chuyển đổi vai trò nhanh (Demo Switcher) phục vụ kiểm thử phân quyền 1 chạm.
  * ============================================================================
  */
 
@@ -21,6 +27,9 @@ import { useTranslation } from 'react-i18next';
 
 import { authService } from '../services/api';
 import { Booking, User, UserRole } from '../types';
+import { ToastItem, ToastType } from '../components/common/Toast';
+
+export type { ToastItem, ToastType };
 
 interface AppContextType {
   role: UserRole;
@@ -56,27 +65,84 @@ interface AppContextType {
   // Notifications
   unreadNotifications: number;
   markNotificationsRead: () => void;
+
+  // Real-time Toast Notifications (TASK-60)
+  toast: ToastItem | null;
+  showToast: (message: string, type?: ToastType, duration?: number) => void;
+  hideToast: () => void;
+
+  // RBAC Permission helper
+  hasPermission: (allowedRoles: UserRole[]) => boolean;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const createDefaultUser = (role: UserRole): User => ({
-  id: `default-${role.toLowerCase()}`,
-  name: role === 'CUSTOMER' ? 'Khách hàng' : `User ${role}`,
-  email: '',
-  phone: '',
-  role: role,
-  status: 'ACTIVE',
-  avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80',
-});
+/**
+ * Khởi tạo dữ liệu người dùng mẫu tương ứng với từng vai trò RBAC
+ * Đồng bộ với MOCK_USERS chuẩn 4 sao trong src/mocks/data.ts
+ */
+export const createDefaultUser = (role: UserRole): User => {
+  switch (role) {
+    case 'ADMIN':
+      return {
+        id: 'usr-admin',
+        employeeCode: 'ADM-001',
+        name: 'Ban Quản Trị Hệ Thống',
+        email: 'admin@nitrohotel.vn',
+        phone: '0912000111',
+        role: 'ADMIN',
+        status: 'ACTIVE',
+        lastLogin: 'Hôm nay 08:30',
+        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80',
+      };
+    case 'MANAGER':
+      return {
+        id: 'usr-manager',
+        employeeCode: 'MGR-001',
+        name: 'Trần Quốc Hưng',
+        email: 'quanly@nitrohotel.vn',
+        phone: '0919998888',
+        role: 'MANAGER',
+        status: 'ACTIVE',
+        lastLogin: 'Hôm nay 08:00',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80',
+      };
+    case 'FRONT_DESK':
+      return {
+        id: 'usr-frontdesk',
+        employeeCode: 'FD-001',
+        name: 'Đỗ Mai Phương',
+        email: 'letan@nitrohotel.vn',
+        phone: '0908889999',
+        role: 'FRONT_DESK',
+        status: 'ACTIVE',
+        lastLogin: 'Hôm nay 07:00',
+        avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=120&q=80',
+      };
+    case 'CUSTOMER':
+    default:
+      return {
+        id: 'usr-customer',
+        employeeCode: 'CUST-001',
+        name: 'Nguyễn Văn An',
+        email: 'khachhang@nitrohotel.vn',
+        phone: '0901234567',
+        role: 'CUSTOMER',
+        status: 'ACTIVE',
+        lastLogin: 'Hôm nay 08:15',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80',
+      };
+  }
+};
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { i18n } = useTranslation();
 
-  // Initialize token, role and user from localStorage if present
+  // 1. Quản lý Token xác thực phiên đăng nhập qua localStorage ('auth_token')
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('auth_token'));
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
 
+  // 2. Quản lý Vai trò phân quyền qua localStorage ('nitro_user_role')
   const [role, setRoleState] = useState<UserRole>(() => {
     const savedRole = localStorage.getItem('nitro_user_role') as UserRole;
     if (savedRole && ['CUSTOMER', 'FRONT_DESK', 'MANAGER', 'ADMIN'].includes(savedRole)) {
@@ -85,21 +151,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return 'CUSTOMER';
   });
 
+  // 3. Quản lý Thông tin người dùng qua localStorage ('nitro_user_info' & 'nitro_current_user')
   const [currentUser, setCurrentUserState] = useState<User>(() => {
-    const savedUser = localStorage.getItem('nitro_current_user');
+    const savedUser = localStorage.getItem('nitro_user_info') || localStorage.getItem('nitro_current_user');
     if (savedUser) {
       try {
         const parsed = JSON.parse(savedUser);
-        if (parsed) return parsed;
+        if (parsed && parsed.role) return parsed;
       } catch {
         // ignore parse error
       }
     }
-    const savedRole = localStorage.getItem('nitro_user_role') as UserRole;
-    return createDefaultUser(savedRole || 'CUSTOMER');
+    const savedRole = (localStorage.getItem('nitro_user_role') as UserRole) || 'CUSTOMER';
+    return createDefaultUser(savedRole);
   });
 
-  const [language, setLanguageState] = useState<'vi' | 'en'>('vi');
+  // 4. Quản lý Ngôn ngữ ưu tiên qua localStorage ('nitro_language')
+  const [language, setLanguageState] = useState<'vi' | 'en'>(() => {
+    const savedLang = localStorage.getItem('nitro_language') as 'vi' | 'en';
+    if (savedLang === 'vi' || savedLang === 'en') {
+      return savedLang;
+    }
+    return 'vi';
+  });
+
   const [viewMode, setViewMode] = useState<'web' | 'mobile_app'>('web');
 
   // Hold countdown (10 minutes = 600 seconds)
@@ -108,10 +183,54 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [showConflictModal, setShowConflictModal] = useState<boolean>(false);
   const [unreadNotifications, setUnreadNotifications] = useState<number>(3);
 
-  // Draft booking held across customer booking steps W-C04 -> W-C05 -> W-C06
-  const [draftBooking, setDraftBooking] = useState<Partial<Booking> | null>(null);
+  // 4b. Hệ thống thông báo nổi Toast thời gian thực (TASK-60: Tự ẩn sau 3s)
+  const [toast, setToast] = useState<ToastItem | null>(null);
 
-  // Validate token on mount
+  const hideToast = () => {
+    setToast(null);
+  };
+
+  const showToast = (message: string, type: ToastType = 'success', duration = 3000) => {
+    const id = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+    setToast({ id, message, type, duration });
+  };
+
+  // 5. Quản lý Đơn đặt phòng nháp lưu bền vững qua localStorage ('nitro_draft_booking')
+  const [draftBooking, setDraftBookingState] = useState<Partial<Booking> | null>(() => {
+    const savedDraft = localStorage.getItem('nitro_draft_booking');
+    if (savedDraft) {
+      try {
+        const parsed = JSON.parse(savedDraft);
+        if (parsed && typeof parsed === 'object') return parsed;
+      } catch {
+        // ignore parse error
+      }
+    }
+    return null;
+  });
+
+  // Wrapper setDraftBooking đồng bộ tức thời với localStorage
+  const setDraftBooking: React.Dispatch<React.SetStateAction<Partial<Booking> | null>> = (valueOrUpdater) => {
+    setDraftBookingState((prev) => {
+      const next = typeof valueOrUpdater === 'function' ? (valueOrUpdater as any)(prev) : valueOrUpdater;
+      if (next) {
+        localStorage.setItem('nitro_draft_booking', JSON.stringify(next));
+      } else {
+        localStorage.removeItem('nitro_draft_booking');
+      }
+      return next;
+    });
+  };
+
+  // Đồng bộ ngôn ngữ i18n khi khởi chạy
+  useEffect(() => {
+    if (language) {
+      i18n.changeLanguage(language);
+      document.documentElement.lang = language;
+    }
+  }, [language, i18n]);
+
+  // Kiểm định Token xác thực khi tải ứng dụng
   useEffect(() => {
     const initAuth = async () => {
       const savedToken = localStorage.getItem('auth_token');
@@ -122,13 +241,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             setCurrentUserState(user);
             setRoleState(user.role);
             setToken(savedToken);
+            localStorage.setItem('nitro_user_role', user.role);
+            localStorage.setItem('nitro_user_info', JSON.stringify(user));
+            localStorage.setItem('nitro_current_user', JSON.stringify(user));
           }
         } catch {
-          // Token invalid or expired -> logout
+          // Token không hợp lệ hoặc đã hết hạn -> đăng xuất an toàn
           await authService.logout();
           setToken(null);
           setRoleState('CUSTOMER');
-          setCurrentUserState(createDefaultUser('CUSTOMER'));
+          const defaultCust = createDefaultUser('CUSTOMER');
+          setCurrentUserState(defaultCust);
+          localStorage.setItem('nitro_user_role', 'CUSTOMER');
+          localStorage.setItem('nitro_user_info', JSON.stringify(defaultCust));
+          localStorage.setItem('nitro_current_user', JSON.stringify(defaultCust));
         }
       }
       setIsAuthLoading(false);
@@ -142,6 +268,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setToken(res.token);
       setRoleState(res.user.role);
       setCurrentUserState(res.user);
+      localStorage.setItem('auth_token', res.token);
+      localStorage.setItem('nitro_user_role', res.user.role);
+      localStorage.setItem('nitro_user_info', JSON.stringify(res.user));
+      localStorage.setItem('nitro_current_user', JSON.stringify(res.user));
       return { success: true, user: res.user };
     } catch (err: any) {
       return { success: false, error: err?.message || 'Đăng nhập không thành công' };
@@ -154,6 +284,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setToken(res.token);
       setRoleState(res.user.role);
       setCurrentUserState(res.user);
+      localStorage.setItem('auth_token', res.token);
+      localStorage.setItem('nitro_user_role', res.user.role);
+      localStorage.setItem('nitro_user_info', JSON.stringify(res.user));
+      localStorage.setItem('nitro_current_user', JSON.stringify(res.user));
       return { success: true, user: res.user };
     } catch (err: any) {
       return { success: false, error: err?.message || 'Đăng ký không thành công' };
@@ -164,24 +298,49 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await authService.logout();
     setToken(null);
     setRoleState('CUSTOMER');
-    setCurrentUserState(createDefaultUser('CUSTOMER'));
+    const defaultCust = createDefaultUser('CUSTOMER');
+    setCurrentUserState(defaultCust);
+    localStorage.removeItem('auth_token');
+    localStorage.setItem('nitro_user_role', 'CUSTOMER');
+    localStorage.removeItem('nitro_user_info');
+    localStorage.removeItem('nitro_current_user');
   };
 
   const setCurrentUser = (user: User) => {
     setCurrentUserState(user);
+    localStorage.setItem('nitro_user_info', JSON.stringify(user));
     localStorage.setItem('nitro_current_user', JSON.stringify(user));
   };
 
+  /**
+   * Chuyển đổi vai trò 1-click (Demo Switcher RBAC)
+   * Tự động khởi tạo hồ sơ nhân sự/khách tương ứng và cấp mock token cho Staff
+   */
   const setRole = (newRole: UserRole) => {
     setRoleState(newRole);
     localStorage.setItem('nitro_user_role', newRole);
     const mockUser = createDefaultUser(newRole);
     setCurrentUserState(mockUser);
+    localStorage.setItem('nitro_user_info', JSON.stringify(mockUser));
     localStorage.setItem('nitro_current_user', JSON.stringify(mockUser));
+
+    if (newRole !== 'CUSTOMER') {
+      const mockToken = `demo-token-${newRole.toLowerCase()}-${Date.now()}`;
+      setToken(mockToken);
+      localStorage.setItem('auth_token', mockToken);
+    } else {
+      // Khi về Customer, nếu là mock demo token thì dọn dẹp
+      const currentToken = localStorage.getItem('auth_token');
+      if (currentToken && currentToken.startsWith('demo-token-')) {
+        setToken(null);
+        localStorage.removeItem('auth_token');
+      }
+    }
   };
 
   const setLanguage = (lang: 'vi' | 'en') => {
     setLanguageState(lang);
+    localStorage.setItem('nitro_language', lang);
     i18n.changeLanguage(lang);
     document.documentElement.lang = lang;
   };
@@ -192,7 +351,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const clearDraftBooking = () => {
-    setDraftBooking(null);
+    setDraftBookingState(null);
+    localStorage.removeItem('nitro_draft_booking');
     resetHoldCountdown();
   };
 
@@ -244,6 +404,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         clearDraftBooking,
         unreadNotifications,
         markNotificationsRead,
+        toast,
+        showToast,
+        hideToast,
+        hasPermission: (allowedRoles: UserRole[]) => allowedRoles.includes(role),
       }}
     >
       {children}

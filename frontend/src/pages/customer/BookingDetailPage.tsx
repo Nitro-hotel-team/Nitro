@@ -43,7 +43,13 @@ import { useApp } from '../../context/AppContext';
 import { MOCK_ROOM_TYPES, MOCK_SERVICES } from '../../mocks/data';
 import { bookingService } from '../../services/api';
 import { Booking } from '../../types';
-import { formatCurrency, formatDate } from '../../utils/format';
+import {
+  calculateRefundAmount,
+  calculateRefundRate,
+  formatCurrency,
+  formatDate,
+  getRefundTierLabel,
+} from '../../utils/format';
 
 export const BookingDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -78,11 +84,11 @@ export const BookingDetailPage: React.FC = () => {
     );
   }
 
-  // Calculate refund tier according to 4-star policy: >48h 100%, 24-48h 50%, <24h 0%
+  // Calculate refund tier according to 4-star policy: >48h 100%, 24-48h 50%, <24h 0% (TASK-61)
   const checkInTime = new Date(booking.checkInDate).getTime();
   const diffHours = (checkInTime - Date.now()) / (1000 * 60 * 60);
-  let refundRate = 1;
-  let refundTierLabel = isEn ? '100% Refund (>48h)' : 'Hoàn 100% (>48h)';
+  let refundRate = calculateRefundRate(diffHours);
+  let refundTierLabel = getRefundTierLabel(diffHours, language);
 
   if (diffHours < 24) {
     refundRate = 0;
@@ -91,7 +97,7 @@ export const BookingDetailPage: React.FC = () => {
     refundRate = 0.5;
     refundTierLabel = isEn ? '50% Refund (24-48h)' : 'Hoàn 50% (24-48h)';
   }
-  const estimatedRefund = Math.round(booking.paidAmount * refundRate);
+  const estimatedRefund = calculateRefundAmount(booking.paidAmount, diffHours);
 
   const rt = MOCK_ROOM_TYPES.find((r) => r.id === booking.roomTypeId || r.name === booking.roomTypeName);
   const localizedRoomName = isEn && rt?.nameEn ? rt.nameEn : booking.roomTypeName;
