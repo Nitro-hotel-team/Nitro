@@ -46,6 +46,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '../components/common/Button';
 import { ForbiddenView } from '../components/common/ForbiddenView';
+import { DemoSwitcher } from '../components/common/DemoSwitcher';
 import { useApp } from '../context/AppContext';
 import { UserRole } from '../types';
 import { canAccessRoute } from '../utils/rbac';
@@ -68,7 +69,6 @@ export const StaffLayout: React.FC = () => {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [quickSearchQuery, setQuickSearchQuery] = useState('');
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
-  const [roleSwitcherOpen, setRoleSwitcherOpen] = useState(false);
 
   // All menu items mapped by role permission and grouped by operational area
   const menuItems: MenuItem[] = [
@@ -275,60 +275,9 @@ export const StaffLayout: React.FC = () => {
           })}
         </div>
 
-        {/* Sidebar Footer with Fast Role Switcher */}
+        {/* Sidebar Footer with Fast Role Switcher (TASK-57: Demo Switcher) */}
         <div className="p-3 border-t border-slate-800 relative">
-          <div
-            onClick={() => setRoleSwitcherOpen(!roleSwitcherOpen)}
-            className="flex items-center gap-3 p-2 rounded-lg bg-slate-900/80 border border-slate-800 hover:border-slate-700 cursor-pointer transition select-none"
-            title="Nhấp để đổi nhanh vai trò kiểm thử (RBAC Switcher)"
-          >
-            <img
-              src={currentUser.avatar}
-              alt={currentUser.name}
-              className="w-8 h-8 rounded-full object-cover shrink-0 ring-1 ring-slate-700"
-            />
-            {!collapsed && (
-              <div className="flex-1 min-w-0">
-                <div className="text-xs font-bold text-white truncate flex items-center justify-between">
-                  <span>{currentUser.name}</span>
-                  <span className="text-[10px] text-slate-400">▼</span>
-                </div>
-                <div className="text-[10px] text-[#C9A227] font-semibold uppercase tracking-wider">
-                  {t(`role.${role}`)}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Role Switcher Popover */}
-          {roleSwitcherOpen && (
-            <>
-              <div
-                className="fixed inset-0 z-40"
-                onClick={() => setRoleSwitcherOpen(false)}
-              />
-              <div className="absolute bottom-20 left-3 right-3 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 text-xs">
-                <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider px-2 py-1 border-b border-slate-800 mb-1">
-                  Chuyển đổi Vai trò (Demo RBAC)
-                </div>
-                {(['FRONT_DESK', 'MANAGER', 'ADMIN'] as const).map((r) => (
-                  <button
-                    key={r}
-                    onClick={() => {
-                      setRole(r);
-                      setRoleSwitcherOpen(false);
-                    }}
-                    className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between transition cursor-pointer ${
-                      role === r ? 'bg-[#1F5AA6] text-white font-bold' : 'text-slate-300 hover:bg-slate-800'
-                    }`}
-                  >
-                    <span>{t(`role.${r}`)}</span>
-                    {role === r && <span className="text-xs">✓</span>}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
+          <DemoSwitcher variant="sidebar" collapsed={collapsed} />
 
           <Link
             to="/"
