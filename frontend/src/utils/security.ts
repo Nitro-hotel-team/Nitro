@@ -194,3 +194,4 @@ export function setupConsoleSanitizer(): void {
     originalWarn.apply(console, sanitizedArgs);
   };
 }
+

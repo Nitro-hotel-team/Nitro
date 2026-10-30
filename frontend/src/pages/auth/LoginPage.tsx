@@ -116,6 +116,8 @@ export const LoginPage: React.FC = () => {
               src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80"
               alt="Nitro Grand Hotel"
               className="w-full h-full object-cover"
+              loading="lazy"
+              decoding="async"
             />
           </div>
           <div className="relative z-10 space-y-2">

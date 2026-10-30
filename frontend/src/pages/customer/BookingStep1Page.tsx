@@ -448,6 +448,8 @@ export const BookingStep1Page: React.FC = () => {
                     src={roomType.image}
                     alt={roomType.name}
                     className="w-16 h-14 rounded-lg object-cover border border-slate-200 shrink-0"
+                    loading="lazy"
+                    decoding="async"
                   />
                   <div>
                     <h3 className="text-sm font-bold text-[#0F172A]">{roomType.name}</h3>
@@ -938,6 +940,8 @@ export const BookingStep1Page: React.FC = () => {
                 src={roomType.image}
                 alt={roomType.name}
                 className="w-24 h-20 rounded-xl object-cover shrink-0 border border-slate-200 shadow-2xs"
+                loading="lazy"
+                decoding="async"
               />
               <div>
                 <span className="text-[11px] font-extrabold text-[#1F5AA6] bg-blue-50 px-1.5 py-0.5 rounded">

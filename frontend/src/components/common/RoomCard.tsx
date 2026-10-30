@@ -187,6 +187,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({
           className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105 cursor-pointer"
           onClick={handleViewDetails}
           loading="lazy"
+          decoding="async"
         />
 
         {/* Lớp bóng mờ chuyển ảnh */}
