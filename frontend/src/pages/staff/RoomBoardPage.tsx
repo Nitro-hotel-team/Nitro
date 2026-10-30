@@ -42,6 +42,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/common/Button';
 import { Drawer } from '../../components/common/Drawer';
+import { Modal } from '../../components/common/Modal';
 import { StatusBadge } from '../../components/common/StatusBadge';
 import { bookingService, roomService } from '../../services/api';
 import { Booking, Room, RoomStatus } from '../../types';
@@ -61,8 +62,18 @@ export const RoomBoardPage: React.FC = () => {
   const [roomTypeFilter, setRoomTypeFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Selected Room for Drawer
+  // Selected Room for Drawer & Modals
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+  const [checkInModalOpen, setCheckInModalOpen] = useState(false);
+  const [checkOutModalOpen, setCheckOutModalOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage((prev) => (prev === msg ? null : prev));
+    }, 3500);
+  };
 
   useEffect(() => {
     Promise.all([roomService.getRooms(), bookingService.getBookings()]).then(
@@ -79,8 +90,52 @@ export const RoomBoardPage: React.FC = () => {
     const updated = await roomService.getRooms();
     setRooms(updated);
     if (selectedRoom && selectedRoom.id === roomId) {
-      setSelectedRoom({ ...selectedRoom, status: newStatus });
+      setSelectedRoom({ ...selectedRoom, status: newStatus, isClean: newStatus === 'AVAILABLE' });
     }
+  };
+
+  const handleMarkClean = async (roomId: string) => {
+    await handleUpdateRoomStatus(roomId, 'AVAILABLE');
+    showToast(`✓ Phòng ${selectedRoom?.roomNumber || roomId} đã dọn sạch sẵn sàng đón khách!`);
+  };
+
+  const handleMarkMaintenance = async (roomId: string) => {
+    await handleUpdateRoomStatus(roomId, 'MAINTENANCE');
+    showToast(`⚠ Đã tạm khóa phòng ${selectedRoom?.roomNumber || roomId} để bảo trì thiết bị.`);
+  };
+
+  const handleConfirmCheckIn = async () => {
+    if (!selectedRoom) return;
+    await roomService.updateRoomStatus(selectedRoom.id, 'OCCUPIED');
+    if (activeBooking) {
+      await bookingService.updateBookingStatus(activeBooking.id, 'CHECKED_IN');
+    }
+    const [updatedRooms, updatedBookings] = await Promise.all([
+      roomService.getRooms(),
+      bookingService.getBookings(),
+    ]);
+    setRooms(updatedRooms);
+    setBookings(updatedBookings);
+    setCheckInModalOpen(false);
+    setSelectedRoom(null);
+    showToast(`✓ Check-in thành công phòng ${selectedRoom.roomNumber} cho khách ${activeBooking?.guestName || 'đặt trước'}!`);
+  };
+
+  const handleConfirmCheckOut = async () => {
+    if (!selectedRoom) return;
+    await roomService.updateRoomStatus(selectedRoom.id, 'CLEANING');
+    if (activeBooking) {
+      await bookingService.updateBookingStatus(activeBooking.id, 'CHECKED_OUT');
+    }
+    const [updatedRooms, updatedBookings] = await Promise.all([
+      roomService.getRooms(),
+      bookingService.getBookings(),
+    ]);
+    setRooms(updatedRooms);
+    setBookings(updatedBookings);
+    setCheckOutModalOpen(false);
+    setSelectedRoom(null);
+    showToast(`✓ Đã trả phòng ${selectedRoom.roomNumber}. Phòng tự động chuyển sang Chờ dọn dẹp.`);
   };
 
   // Status counts
@@ -148,30 +203,36 @@ export const RoomBoardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Status Legend Bar (Interactive filter chips with counts) */}
-      <div className="bg-white border border-[#E2E8F0] rounded-2xl p-3 shadow-xs flex items-center gap-2 overflow-x-auto pb-2 sm:pb-3 sm:flex-wrap text-xs">
-        <span className="text-[#475569] font-bold mr-1 shrink-0">Trạng thái:</span>
+      {/* 5+1 Interactive StatCards for PMS status overview (TASK-35) */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { key: 'ALL', label: 'Tất cả', count: counts.ALL, bg: 'bg-slate-100 text-slate-800' },
-          { key: 'AVAILABLE', label: 'Trống', count: counts.AVAILABLE, bg: 'bg-emerald-100 text-emerald-800' },
-          { key: 'OCCUPIED', label: 'Đang ở', count: counts.OCCUPIED, bg: 'bg-blue-100 text-blue-800' },
-          { key: 'RESERVED', label: 'Đã đặt trước', count: counts.RESERVED, bg: 'bg-amber-100 text-amber-800' },
-          { key: 'CLEANING', label: 'Đang dọn', count: counts.CLEANING, bg: 'bg-purple-100 text-purple-800' },
-          { key: 'MAINTENANCE', label: 'Bảo trì', count: counts.MAINTENANCE, bg: 'bg-rose-100 text-rose-800' },
+          { key: 'ALL', label: 'Tổng số phòng', count: counts.ALL, icon: <DoorOpen className="w-5 h-5 text-slate-700" />, bgActive: 'ring-2 ring-slate-800 bg-slate-50', textColor: 'text-slate-900' },
+          { key: 'AVAILABLE', label: 'Sẵn sàng đón', count: counts.AVAILABLE, icon: <CheckCircle2 className="w-5 h-5 text-emerald-600" />, bgActive: 'ring-2 ring-emerald-600 bg-emerald-50', textColor: 'text-emerald-700' },
+          { key: 'OCCUPIED', label: 'Đang có khách', count: counts.OCCUPIED, icon: <User className="w-5 h-5 text-blue-600" />, bgActive: 'ring-2 ring-blue-600 bg-blue-50', textColor: 'text-blue-700' },
+          { key: 'RESERVED', label: 'Đã đặt trước', count: counts.RESERVED, icon: <Clock className="w-5 h-5 text-amber-600" />, bgActive: 'ring-2 ring-amber-600 bg-amber-50', textColor: 'text-amber-700' },
+          { key: 'CLEANING', label: 'Chờ dọn dẹp', count: counts.CLEANING, icon: <Sparkles className="w-5 h-5 text-purple-600" />, bgActive: 'ring-2 ring-purple-600 bg-purple-50', textColor: 'text-purple-700' },
+          { key: 'MAINTENANCE', label: 'Khóa bảo trì', count: counts.MAINTENANCE, icon: <Wrench className="w-5 h-5 text-rose-600" />, bgActive: 'ring-2 ring-rose-600 bg-rose-50', textColor: 'text-rose-700' },
         ].map((item) => {
           const active = statusFilter === item.key;
           return (
             <button
               key={item.key}
+              type="button"
               onClick={() => setStatusFilter(item.key as any)}
-              className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition shrink-0 cursor-pointer ${
-                active ? 'ring-2 ring-[#1F5AA6] ' + item.bg : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+              className={`p-3 rounded-2xl bg-white border text-left transition transform hover:-translate-y-0.5 shadow-xs cursor-pointer flex flex-col justify-between ${
+                active ? item.bgActive + ' shadow-md' : 'border-[#E2E8F0] hover:border-slate-300'
               }`}
             >
-              <span className="whitespace-nowrap">{item.label}</span>
-              <span className="text-[10px] bg-white/80 px-1.5 py-0.2 rounded-full tabular-nums">
-                {item.count}
-              </span>
+              <div className="flex items-center justify-between mb-2">
+                <span className="p-2 rounded-xl bg-slate-50 border border-slate-100">{item.icon}</span>
+                <span className={`text-2xl font-black tabular-nums ${item.textColor}`}>{item.count}</span>
+              </div>
+              <div>
+                <div className="text-[11px] font-bold text-[#475569] truncate">{item.label}</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">
+                  {Math.round((item.count / (counts.ALL || 1)) * 100)}% tổng kho
+                </div>
+              </div>
             </button>
           );
         })}
@@ -293,14 +354,34 @@ export const RoomBoardPage: React.FC = () => {
                         {/* Status badge & detail */}
                         <div>
                           <StatusBadge status={room.status} type="room" size="sm" />
-                          {room.guestName && (
-                            <div className="text-[11px] font-bold text-[#0F172A] truncate mt-1">
-                              {room.guestName}
+                          {isOccupied && (
+                            <div className="mt-1">
+                              <div className="text-[11px] font-bold text-[#0F172A] truncate flex items-center gap-1">
+                                <User className="w-3 h-3 text-blue-600 shrink-0" />
+                                <span className="truncate">{room.guestName || 'Khách lưu trú'}</span>
+                              </div>
+                              <div className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
+                                <Clock className="w-3 h-3 text-slate-400 shrink-0" />
+                                <span>{room.checkoutTime || 'Trả: 12:00'}</span>
+                              </div>
+                            </div>
+                          )}
+                          {isReserved && (
+                            <div className="mt-1">
+                              <div className="text-[11px] font-bold text-[#0F172A] truncate">
+                                {room.guestName || 'Đã đặt trước'}
+                              </div>
+                              <div className="text-[10px] text-amber-700 font-semibold">Chờ nhận phòng</div>
                             </div>
                           )}
                           {isCleaning && (
-                            <div className="text-[10px] text-purple-700 flex items-center gap-1 mt-0.5">
-                              <Sparkles className="w-3 h-3" /> Đang dọn
+                            <div className="text-[10px] text-purple-700 flex items-center gap-1 mt-1 font-semibold">
+                              <Sparkles className="w-3 h-3" /> Chờ buồng dọn
+                            </div>
+                          )}
+                          {isMaintenance && (
+                            <div className="text-[10px] text-rose-700 flex items-center gap-1 mt-1 font-semibold">
+                              <Wrench className="w-3 h-3" /> Bảo trì thiết bị
                             </div>
                           )}
                         </div>
@@ -383,10 +464,71 @@ export const RoomBoardPage: React.FC = () => {
               </div>
             </div>
 
+            {/* Contextual Primary Action based on Room Status (TASK-37, TASK-38) */}
+            {selectedRoom.status === 'CLEANING' && (
+              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2">
+                <div className="font-bold text-emerald-900 flex items-center gap-1.5 text-xs">
+                  <Sparkles className="w-4 h-4 text-emerald-600" />
+                  Phòng đang chờ vệ sinh buồng phòng
+                </div>
+                <p className="text-emerald-700 text-[11px]">
+                  Sau khi nhân viên buồng hoàn tất dọn dẹp, bấm nút dưới để chuyển trạng thái phòng sang Sẵn sàng đón khách (Available).
+                </p>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+                  onClick={() => handleMarkClean(selectedRoom.id)}
+                >
+                  ✓ Đã dọn sạch (Mark Clean)
+                </Button>
+              </div>
+            )}
+
+            {selectedRoom.status === 'RESERVED' && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl space-y-2">
+                <div className="font-bold text-[#1F5AA6] flex items-center gap-1.5 text-xs">
+                  <DoorOpen className="w-4 h-4 text-[#1F5AA6]" />
+                  Phòng đã có khách đặt trước
+                </div>
+                <p className="text-slate-600 text-[11px]">
+                  Khách hàng <span className="font-bold">{activeBooking?.guestName || 'đặt trước'}</span> đã đến sảnh. Tiến hành thủ tục nhận phòng.
+                </p>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className="w-full font-bold"
+                  onClick={() => setCheckInModalOpen(true)}
+                >
+                  Nhận phòng (Check-in ngay)
+                </Button>
+              </div>
+            )}
+
+            {selectedRoom.status === 'OCCUPIED' && (
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl space-y-2">
+                <div className="font-bold text-amber-900 flex items-center gap-1.5 text-xs">
+                  <CheckCircle2 className="w-4 h-4 text-amber-600" />
+                  Khách đang lưu trú tại phòng
+                </div>
+                <p className="text-amber-800 text-[11px]">
+                  Khách làm thủ tục trả phòng. Hệ thống sẽ thanh toán hóa đơn và tự động chuyển phòng sang Chờ dọn dẹp.
+                </p>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  className="w-full font-bold"
+                  onClick={() => setCheckOutModalOpen(true)}
+                >
+                  Trả phòng (Check-out &amp; Báo dọn)
+                </Button>
+              </div>
+            )}
+
             {/* Quick Status Control Buttons */}
             <div>
               <span className="block font-bold text-[#0F172A] uppercase tracking-wider mb-2">
-                Chuyển trạng thái nhanh:
+                Chuyển trạng thái linh hoạt:
               </span>
               <div className="grid grid-cols-2 gap-2">
                 <Button
@@ -408,10 +550,10 @@ export const RoomBoardPage: React.FC = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleUpdateRoomStatus(selectedRoom.id, 'MAINTENANCE')}
+                  onClick={() => handleMarkMaintenance(selectedRoom.id)}
                   className="text-rose-700 border-rose-200 hover:bg-rose-50"
                 >
-                  <Wrench className="w-3.5 h-3.5 mr-1" /> Bảo trì thiết bị
+                  <Wrench className="w-3.5 h-3.5 mr-1" /> Báo hỏng / Bảo trì
                 </Button>
                 <Button
                   variant="outline"
@@ -472,6 +614,78 @@ export const RoomBoardPage: React.FC = () => {
           </div>
         )}
       </Drawer>
+
+      {/* Check-in Modal (TASK-38) */}
+      <Modal
+        isOpen={checkInModalOpen}
+        onClose={() => setCheckInModalOpen(false)}
+        title={`Xác nhận Nhận phòng (Check-in) — Phòng ${selectedRoom?.roomNumber}`}
+        footer={
+          <div className="flex justify-end gap-2 w-full">
+            <Button variant="outline" size="sm" onClick={() => setCheckInModalOpen(false)}>
+              Hủy
+            </Button>
+            <Button variant="primary" size="sm" onClick={handleConfirmCheckIn}>
+              Xác nhận Check-in ngay
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4 text-xs">
+          <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl space-y-1.5">
+            <div className="font-bold text-[#0F172A] text-sm">
+              Khách hàng: {activeBooking?.guestName || 'Nguyễn Văn An'}
+            </div>
+            <div className="text-slate-600">Mã đơn: <span className="font-mono font-bold text-[#1F5AA6]">{activeBooking?.bookingCode || 'NTR-260921-0042'}</span></div>
+            <div className="text-slate-600">SĐT: <span className="font-mono">{activeBooking?.guestPhone || '0912 345 678'}</span></div>
+            <div className="text-slate-600">Thời gian: {activeBooking ? `${formatDate(activeBooking.checkInDate)} → ${formatDate(activeBooking.checkOutDate)}` : 'Hôm nay'}</div>
+          </div>
+          <p className="text-slate-600">
+            Hệ thống sẽ cập nhật trạng thái phòng <span className="font-bold text-[#0F172A]">{selectedRoom?.roomNumber}</span> sang <span className="font-bold text-blue-700">OCCUPIED (Đang ở)</span> và kích hoạt đồng hồ lưu trú cho khách.
+          </p>
+        </div>
+      </Modal>
+
+      {/* Check-out Modal (TASK-38) */}
+      <Modal
+        isOpen={checkOutModalOpen}
+        onClose={() => setCheckOutModalOpen(false)}
+        title={`Xác nhận Trả phòng (Check-out) — Phòng ${selectedRoom?.roomNumber}`}
+        footer={
+          <div className="flex justify-end gap-2 w-full">
+            <Button variant="outline" size="sm" onClick={() => setCheckOutModalOpen(false)}>
+              Hủy
+            </Button>
+            <Button variant="danger" size="sm" onClick={handleConfirmCheckOut}>
+              Xác nhận Trả phòng &amp; Báo dọn
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4 text-xs">
+          <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl space-y-1.5">
+            <div className="font-bold text-[#0F172A] text-sm">
+              Khách trả: {activeBooking?.guestName || selectedRoom?.guestName || 'Khách lưu trú'}
+            </div>
+            <div className="text-slate-600">Phòng: <span className="font-bold text-[#0F172A]">{selectedRoom?.roomNumber}</span> ({selectedRoom?.roomTypeName})</div>
+            <div className="text-slate-600">Tình trạng hóa đơn: <span className="font-bold text-emerald-700">Đã thanh toán đủ</span></div>
+          </div>
+          <p className="text-slate-600">
+            Sau khi xác nhận trả phòng, phòng <span className="font-bold text-[#0F172A]">{selectedRoom?.roomNumber}</span> sẽ lập tức chuyển sang trạng thái <span className="font-bold text-purple-700">CLEANING (Chờ dọn dẹp)</span> để nhân viên buồng phòng thực hiện vệ sinh.
+          </p>
+        </div>
+      </Modal>
+
+      {/* Toast Notification (TASK-38) */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-[#0F172A] text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-5">
+          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+          <span className="text-xs font-semibold">{toastMessage}</span>
+          <button onClick={() => setToastMessage(null)} className="text-slate-400 hover:text-white ml-2 cursor-pointer">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
     </div>
   );
 };

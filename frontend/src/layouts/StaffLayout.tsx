@@ -45,19 +45,23 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '../components/common/Button';
+import { ForbiddenView } from '../components/common/ForbiddenView';
+import { DemoSwitcher } from '../components/common/DemoSwitcher';
 import { useApp } from '../context/AppContext';
 import { UserRole } from '../types';
+import { canAccessRoute } from '../utils/rbac';
 
 interface MenuItem {
   title: string;
   path: string;
   icon: React.ReactNode;
   allowedRoles: UserRole[];
+  category: 'FRONT_DESK' | 'MANAGER' | 'ADMIN';
 }
 
 export const StaffLayout: React.FC = () => {
   const { t } = useTranslation();
-  const { role, logout, currentUser, language, setLanguage, unreadNotifications, markNotificationsRead } = useApp();
+  const { role, setRole, logout, currentUser, language, setLanguage, unreadNotifications, markNotificationsRead } = useApp();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -66,7 +70,7 @@ export const StaffLayout: React.FC = () => {
   const [quickSearchQuery, setQuickSearchQuery] = useState('');
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
 
-  // All menu items mapped by role permission (Cụm 2)
+  // All menu items mapped by role permission and grouped by operational area
   const menuItems: MenuItem[] = [
     // Front Desk (Lễ tân)
     {
@@ -74,30 +78,35 @@ export const StaffLayout: React.FC = () => {
       path: '/staff/overview',
       icon: <ClipboardList className="w-5 h-5" />,
       allowedRoles: ['FRONT_DESK', 'MANAGER', 'ADMIN'],
+      category: 'FRONT_DESK',
     },
     {
       title: t('nav.roomBoard'),
       path: '/staff/room-board',
       icon: <DoorOpen className="w-5 h-5" />,
       allowedRoles: ['FRONT_DESK', 'MANAGER', 'ADMIN'],
+      category: 'FRONT_DESK',
     },
     {
       title: t('nav.roomTimeline'),
       path: '/staff/timeline',
       icon: <Calendar className="w-5 h-5" />,
       allowedRoles: ['FRONT_DESK', 'MANAGER', 'ADMIN'],
+      category: 'FRONT_DESK',
     },
     {
       title: t('nav.bookingsList'),
       path: '/staff/bookings',
       icon: <FileText className="w-5 h-5" />,
       allowedRoles: ['FRONT_DESK', 'MANAGER', 'ADMIN'],
+      category: 'FRONT_DESK',
     },
     {
       title: t('nav.customers'),
       path: '/staff/customers',
       icon: <Users className="w-5 h-5" />,
       allowedRoles: ['FRONT_DESK', 'MANAGER', 'ADMIN'],
+      category: 'FRONT_DESK',
     },
 
     // Manager (Quản lý)
@@ -106,30 +115,35 @@ export const StaffLayout: React.FC = () => {
       path: '/staff/dashboard',
       icon: <LayoutDashboard className="w-5 h-5" />,
       allowedRoles: ['MANAGER', 'ADMIN'],
+      category: 'MANAGER',
     },
     {
       title: t('nav.roomTypes'),
       path: '/staff/room-types',
       icon: <Layers className="w-5 h-5" />,
       allowedRoles: ['MANAGER', 'ADMIN'],
+      category: 'MANAGER',
     },
     {
       title: t('nav.roomsManage'),
       path: '/staff/rooms',
       icon: <Hotel className="w-5 h-5" />,
       allowedRoles: ['MANAGER', 'ADMIN'],
+      category: 'MANAGER',
     },
     {
       title: t('nav.services'),
       path: '/staff/services',
       icon: <Utensils className="w-5 h-5" />,
       allowedRoles: ['MANAGER', 'ADMIN'],
+      category: 'MANAGER',
     },
     {
       title: t('nav.reports'),
       path: '/staff/reports',
       icon: <BarChart3 className="w-5 h-5" />,
       allowedRoles: ['MANAGER', 'ADMIN'],
+      category: 'MANAGER',
     },
 
     // Admin
@@ -138,18 +152,21 @@ export const StaffLayout: React.FC = () => {
       path: '/staff/users',
       icon: <ShieldCheck className="w-5 h-5" />,
       allowedRoles: ['ADMIN'],
+      category: 'ADMIN',
     },
     {
       title: t('nav.settings'),
       path: '/staff/settings',
       icon: <Settings className="w-5 h-5" />,
       allowedRoles: ['ADMIN'],
+      category: 'ADMIN',
     },
     {
       title: t('nav.auditLogs'),
       path: '/staff/logs',
       icon: <History className="w-5 h-5" />,
       allowedRoles: ['ADMIN'],
+      category: 'ADMIN',
     },
   ];
 
@@ -160,9 +177,7 @@ export const StaffLayout: React.FC = () => {
 
   // Check if current route is allowed for the active role (403 guard)
   const currentMenuItem = menuItems.find((item) => item.path === location.pathname);
-  const isForbidden =
-    role === 'CUSTOMER' ||
-    (currentMenuItem && !currentMenuItem.allowedRoles.includes(role));
+  const isForbidden = !canAccessRoute(location.pathname, role) || (currentMenuItem && !currentMenuItem.allowedRoles.includes(role));
 
   const handleLogout = async () => {
     await logout();
@@ -177,34 +192,10 @@ export const StaffLayout: React.FC = () => {
 
   if (isForbidden) {
     return (
-      <div className="min-h-screen bg-[#0B1F3A] flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-2xl border border-slate-700">
-          <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4 text-rose-600">
-            <ShieldCheck className="w-8 h-8" />
-          </div>
-          <h1 className="text-2xl font-bold text-[#0F172A] mb-2">403 — Không có quyền truy cập</h1>
-          <p className="text-sm text-[#475569] mb-6">
-            Vai trò hiện tại (<span className="font-bold text-[#1F5AA6]">{t(`role.${role}`)}</span>)
-            không được phép xem trang này. Vui lòng đăng nhập bằng tài khoản có thẩm quyền tương ứng (Lễ tân, Quản lý hoặc Quản trị viên).
-          </p>
-          <div className="flex flex-col gap-2">
-            <Button
-              variant="primary"
-              size="md"
-              onClick={() => navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`)}
-            >
-              Đăng nhập tài khoản nội bộ
-            </Button>
-            <Button
-              variant="outline"
-              size="md"
-              onClick={() => navigate('/')}
-            >
-              Về trang chủ khách hàng
-            </Button>
-          </div>
-        </div>
-      </div>
+      <ForbiddenView
+        currentRole={role}
+        requiredRoles={currentMenuItem?.allowedRoles}
+      />
     );
   }
 
@@ -241,46 +232,53 @@ export const StaffLayout: React.FC = () => {
         </div>
 
         {/* Navigation list */}
-        <div className="flex-1 overflow-y-auto py-4 px-2 space-y-1">
-          {visibleMenuItems.map((item) => {
-            const active = location.pathname === item.path;
+        <div className="flex-1 overflow-y-auto py-4 px-2 space-y-3">
+          {(['FRONT_DESK', 'MANAGER', 'ADMIN'] as const).map((cat) => {
+            const catItems = visibleMenuItems.filter((item) => item.category === cat);
+            if (catItems.length === 0) return null;
+
+            const categoryLabels: Record<string, string> = {
+              FRONT_DESK: 'Vận hành Lễ tân',
+              MANAGER: 'Quản trị & Báo cáo',
+              ADMIN: 'Hệ thống & Bảo mật',
+            };
+
             return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors group ${
-                  active
-                    ? 'bg-[#1F5AA6] text-white shadow-xs'
-                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                }`}
-                title={collapsed ? item.title : undefined}
-              >
-                <span className={`shrink-0 ${active ? 'text-white' : 'text-slate-400 group-hover:text-white'}`}>
-                  {item.icon}
-                </span>
-                {!collapsed && <span className="truncate">{item.title}</span>}
-              </Link>
+              <div key={cat} className="space-y-1">
+                {!collapsed && (
+                  <div className="px-3 pt-1 pb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                    {categoryLabels[cat]}
+                  </div>
+                )}
+                {catItems.map((item) => {
+                  const active = location.pathname === item.path;
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold transition-colors group relative ${
+                        active
+                          ? 'bg-[#1F5AA6] text-white shadow-xs font-bold'
+                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                      }`}
+                      title={collapsed ? item.title : undefined}
+                    >
+                      <span className={`shrink-0 ${active ? 'text-white' : 'text-slate-400 group-hover:text-white'}`}>
+                        {item.icon}
+                      </span>
+                      {!collapsed && <span className="truncate">{item.title}</span>}
+                    </Link>
+                  );
+                })}
+              </div>
             );
           })}
         </div>
 
-        {/* Sidebar Footer */}
-        <div className="p-3 border-t border-slate-800">
-          <div className="flex items-center gap-3 p-2 rounded-lg bg-slate-900/60 border border-slate-800">
-            <img
-              src={currentUser.avatar}
-              alt={currentUser.name}
-              className="w-8 h-8 rounded-full object-cover shrink-0"
-            />
-            {!collapsed && (
-              <div className="flex-1 min-w-0">
-                <div className="text-xs font-bold text-white truncate">{currentUser.name}</div>
-                <div className="text-[10px] text-[#C9A227] font-semibold uppercase">
-                  {t(`role.${role}`)}
-                </div>
-              </div>
-            )}
-          </div>
+        {/* Sidebar Footer with Fast Role Switcher (TASK-57: Demo Switcher) */}
+        <div className="p-3 border-t border-slate-800 relative">
+          <DemoSwitcher variant="sidebar" collapsed={collapsed} />
+
           <Link
             to="/"
             className="mt-2 w-full flex items-center justify-center gap-2 py-1.5 text-xs text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition"
