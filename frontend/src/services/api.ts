@@ -50,11 +50,11 @@ import {
 // Đọc địa chỉ Backend từ .env hoặc cấu hình Mock Mode
 // Nếu VITE_USE_MOCK=true hoặc không thiết lập VITE_API_URL -> luôn chạy Mock Data
 const IS_MOCK_CONFIGURED =
-  import.meta.env.VITE_USE_MOCK === 'true' ||
-  import.meta.env.VITE_USE_MOCK === true ||
-  !import.meta.env.VITE_API_URL;
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_USE_MOCK === 'true') ||
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_USE_MOCK === true) ||
+  !(typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL);
 
-const API_URL = IS_MOCK_CONFIGURED ? '' : (import.meta.env.VITE_API_URL || '').trim();
+const API_URL = IS_MOCK_CONFIGURED ? '' : ((typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) || '').trim();
 const SIMULATED_DELAY = 150;
 
 const delay = (ms: number = SIMULATED_DELAY) =>
@@ -110,6 +110,7 @@ export const authService = {
         const data: LoginResponse = await res.json();
         localStorage.setItem('auth_token', data.token);
         localStorage.setItem('nitro_user_role', data.user.role);
+        localStorage.setItem('nitro_user_info', JSON.stringify(data.user));
         localStorage.setItem('nitro_current_user', JSON.stringify(data.user));
         return data;
       } catch (err: any) {
@@ -158,6 +159,7 @@ export const authService = {
         const token = `mock-jwt-customer-${Date.now()}`;
         localStorage.setItem('auth_token', token);
         localStorage.setItem('nitro_user_role', customUser.role);
+        localStorage.setItem('nitro_user_info', JSON.stringify(customUser));
         localStorage.setItem('nitro_current_user', JSON.stringify(customUser));
         return { token, user: customUser };
       }
@@ -172,6 +174,7 @@ export const authService = {
     const token = `mock-jwt-${matched.role.toLowerCase()}-${Date.now()}`;
     localStorage.setItem('auth_token', token);
     localStorage.setItem('nitro_user_role', matched.role);
+    localStorage.setItem('nitro_user_info', JSON.stringify(matched));
     localStorage.setItem('nitro_current_user', JSON.stringify(matched));
 
     return { token, user: matched };
@@ -198,6 +201,7 @@ export const authService = {
         const result: LoginResponse = await res.json();
         localStorage.setItem('auth_token', result.token);
         localStorage.setItem('nitro_user_role', result.user.role);
+        localStorage.setItem('nitro_user_info', JSON.stringify(result.user));
         localStorage.setItem('nitro_current_user', JSON.stringify(result.user));
         return result;
       } catch (err: any) {
@@ -230,6 +234,7 @@ export const authService = {
     const token = `mock-jwt-customer-${Date.now()}`;
     localStorage.setItem('auth_token', token);
     localStorage.setItem('nitro_user_role', newUser.role);
+    localStorage.setItem('nitro_user_info', JSON.stringify(newUser));
     localStorage.setItem('nitro_current_user', JSON.stringify(newUser));
     return { token, user: newUser };
   },
@@ -252,7 +257,8 @@ export const authService = {
       const data: LoginResponse = await res.json();
       localStorage.setItem('auth_token', data.token);
       localStorage.setItem('nitro_user_role', data.user.role);
-      localStorage.setItem('nitro_current_user', JSON.stringify(data.user));
+      localStorage.setItem('nitro_user_info', JSON.stringify(data.user));
+        localStorage.setItem('nitro_current_user', JSON.stringify(data.user));
       return data;
     }
     await delay();
@@ -279,7 +285,7 @@ export const authService = {
     }
 
     await delay(50);
-    const saved = localStorage.getItem('nitro_current_user');
+    const saved = localStorage.getItem('nitro_user_info') || localStorage.getItem('nitro_current_user');
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -311,6 +317,7 @@ export const authService = {
     }
     localStorage.removeItem('auth_token');
     localStorage.removeItem('nitro_user_role');
+    localStorage.removeItem('nitro_user_info');
     localStorage.removeItem('nitro_current_user');
   },
 };
@@ -676,9 +683,17 @@ export const bookingService = {
     // Fallback logic mô phỏng
     await delay();
     const roomType = MOCK_ROOM_TYPES.find((rt) => rt.id === data.roomTypeId) || MOCK_ROOM_TYPES[0];
-    const timestamp = Date.now().toString().slice(-4);
-    const dateCode = new Date().toISOString().slice(2, 10).replace(/-/g, '');
-    const bookingCode = `NTR-${dateCode}-${timestamp}`;
+    let bookingCode = data.bookingCode;
+    if (!bookingCode) {
+      if (data.source === 'COUNTER') {
+        const randomNum = Math.floor(100000 + Math.random() * 900000);
+        bookingCode = `WK-${randomNum}`;
+      } else {
+        const timestamp = Date.now().toString().slice(-4);
+        const dateCode = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+        bookingCode = `NTR-${dateCode}-${timestamp}`;
+      }
+    }
 
     const newBooking: Booking = {
       id: `bk-${Date.now()}`,
@@ -709,7 +724,9 @@ export const bookingService = {
     bookingsState = [newBooking, ...bookingsState];
 
     if (newBooking.roomNumber) {
-      const roomIdx = roomsState.findIndex((r) => r.number === newBooking.roomNumber);
+      const roomIdx = roomsState.findIndex(
+        (r) => r.number === newBooking.roomNumber || r.roomNumber === newBooking.roomNumber || r.id === newBooking.roomNumber
+      );
       if (roomIdx !== -1) {
         roomsState[roomIdx] = {
           ...roomsState[roomIdx],

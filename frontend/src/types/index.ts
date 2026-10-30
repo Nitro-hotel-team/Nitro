@@ -148,6 +148,7 @@ export interface Guest {
   totalSpent: number;
   totalStays?: number;
   totalBookings?: number;
+  totalNights?: number;
   vipTier?: string;
   lastStay?: string;
 }
@@ -158,6 +159,7 @@ export interface User {
   email: string;
   phone: string;
   role: UserRole;
+  employeeCode?: string;
   status?: 'ACTIVE' | 'LOCKED';
   lastLogin?: string;
   avatar?: string;

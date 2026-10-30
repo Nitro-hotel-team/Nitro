@@ -32,6 +32,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { DemoSwitcher } from '../components/common/DemoSwitcher';
 
 export const CustomerLayout: React.FC = () => {
   const { t } = useTranslation();
@@ -68,6 +69,9 @@ export const CustomerLayout: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Demo RBAC Switcher (TASK-57) */}
+            <DemoSwitcher variant="header" />
+
             {/* Language Switcher */}
             <div className="flex items-center gap-1 font-semibold text-xs">
               <button
