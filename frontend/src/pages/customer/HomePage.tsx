@@ -94,8 +94,10 @@ export const HomePage: React.FC = () => {
         <div className="absolute inset-0 z-0">
           <img
             src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=2000&q=85"
-            alt="Nitro Grand Hotel Sài Gòn"
+            alt="Toàn cảnh khách sạn 4 sao Nitro Grand Hotel Sài Gòn"
             className="w-full h-full object-cover object-center"
+            loading="eager"
+            decoding="async"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0B1F3A]/90 via-[#0B1F3A]/60 to-[#0B1F3A]/40" />
         </div>
@@ -273,6 +275,8 @@ export const HomePage: React.FC = () => {
               src="https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=800&q=80"
               alt="Nitro Grand Rooftop Pool"
               className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+              loading="lazy"
+              decoding="async"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-6 flex flex-col justify-end text-white">
               <div className="flex items-center gap-2 text-[#C9A227] text-xs font-bold uppercase tracking-wider mb-1">
@@ -290,6 +294,8 @@ export const HomePage: React.FC = () => {
               src="https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&w=800&q=80"
               alt="Nitro Grand Le Grand Buffet"
               className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+              loading="lazy"
+              decoding="async"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-6 flex flex-col justify-end text-white">
               <div className="flex items-center gap-2 text-[#C9A227] text-xs font-bold uppercase tracking-wider mb-1">
@@ -307,6 +313,8 @@ export const HomePage: React.FC = () => {
               src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80"
               alt="Nitro Grand Lotus Wellness & Fitness"
               className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+              loading="lazy"
+              decoding="async"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-6 flex flex-col justify-end text-white">
               <div className="flex items-center gap-2 text-[#C9A227] text-xs font-bold uppercase tracking-wider mb-1">
