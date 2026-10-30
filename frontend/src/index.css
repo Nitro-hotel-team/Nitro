@@ -34,14 +34,32 @@
 }
 
 @layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     font-family: var(--font-sans);
     color: #0F172A;
     background-color: #F8FAFC;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Cross-browser Firefox thin scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #CBD5E1 transparent;
+  }
+
+  :focus-visible {
+    outline: 2px solid #1F5AA6;
+    outline-offset: 2px;
   }
 }
 
-/* Custom scrollbar for dense staff views */
+/* WebKit & Chromium custom scrollbar (Chrome, Edge, Safari, Opera) */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -118,4 +136,3 @@ html, body {
 .active-tap:active {
   transform: scale(0.98);
 }
-

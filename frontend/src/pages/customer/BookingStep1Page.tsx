@@ -57,6 +57,7 @@ import { useApp } from '../../context/AppContext';
 import { MOCK_ROOM_TYPES, MOCK_SERVICES } from '../../mocks/data';
 import { ExtraServiceItem, HotelService } from '../../types';
 import { formatCurrency, formatDate } from '../../utils/format';
+import { sanitizeUserInput } from '../../utils/security';
 
 // Quick tags for special requests
 const QUICK_REQUEST_TAGS = [
@@ -336,11 +337,11 @@ export const BookingStep1Page: React.FC = () => {
       nights,
       adults,
       children,
-      guestName: fullName.trim(),
+      guestName: sanitizeUserInput(fullName.trim()),
       guestPhone: phone.trim(),
       guestEmail: email.trim(),
       estimatedArrivalTime: arrivalTime,
-      specialRequests: specialRequests.trim(),
+      specialRequests: sanitizeUserInput(specialRequests.trim()),
       extraServices: selectedServices,
       discountCode: appliedPromo?.code,
       discountAmount,

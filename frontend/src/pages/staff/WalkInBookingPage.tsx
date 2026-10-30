@@ -39,6 +39,7 @@ import { Button } from '../../components/common/Button';
 import { bookingService, roomService } from '../../services/api';
 import { Booking, Room, RoomType } from '../../types';
 import { formatCurrency, formatDate } from '../../utils/format';
+import { sanitizeUserInput } from '../../utils/security';
 
 export const WalkInBookingPage: React.FC = () => {
   const { t } = useTranslation();
@@ -158,7 +159,7 @@ export const WalkInBookingPage: React.FC = () => {
       nights,
       adults,
       children,
-      guestName: guestName.trim() || 'Khách vãng lai',
+      guestName: sanitizeUserInput(guestName.trim()) || 'Khách vãng lai',
       guestPhone: guestPhone.trim() || '0900000000',
       guestEmail: guestEmail.trim() || 'khach@nitrohotel.vn',
       guestIdCard: idCard.trim(),
