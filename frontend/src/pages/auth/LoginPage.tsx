@@ -24,6 +24,7 @@ import { Button } from '../../components/common/Button';
 import { useApp } from '../../context/AppContext';
 import { GoogleLogin } from '@react-oauth/google';
 import { authService } from '../../services/api';
+import { isSafeUrl } from '../../utils/security';
 
 import { UserRole } from '../../types';
 
@@ -56,7 +57,8 @@ export const LoginPage: React.FC = () => {
     // Check if there is a redirect URL in query params
     const searchParams = new URLSearchParams(window.location.search);
     const redirectUrl = searchParams.get('redirect');
-    if (redirectUrl) {
+    // Chống Open Redirect (TASK-63 / FE-S4-07)
+    if (redirectUrl && isSafeUrl(redirectUrl) && redirectUrl.startsWith('/')) {
       navigate(redirectUrl);
       return;
     }
@@ -114,6 +116,8 @@ export const LoginPage: React.FC = () => {
               src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80"
               alt="Nitro Grand Hotel"
               className="w-full h-full object-cover"
+              loading="lazy"
+              decoding="async"
             />
           </div>
           <div className="relative z-10 space-y-2">

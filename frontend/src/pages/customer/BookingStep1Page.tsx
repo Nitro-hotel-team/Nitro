@@ -57,6 +57,7 @@ import { useApp } from '../../context/AppContext';
 import { MOCK_ROOM_TYPES, MOCK_SERVICES } from '../../mocks/data';
 import { ExtraServiceItem, HotelService } from '../../types';
 import { formatCurrency, formatDate } from '../../utils/format';
+import { sanitizeUserInput } from '../../utils/security';
 
 // Quick tags for special requests
 const QUICK_REQUEST_TAGS = [
@@ -336,11 +337,11 @@ export const BookingStep1Page: React.FC = () => {
       nights,
       adults,
       children,
-      guestName: fullName.trim(),
+      guestName: sanitizeUserInput(fullName.trim()),
       guestPhone: phone.trim(),
       guestEmail: email.trim(),
       estimatedArrivalTime: arrivalTime,
-      specialRequests: specialRequests.trim(),
+      specialRequests: sanitizeUserInput(specialRequests.trim()),
       extraServices: selectedServices,
       discountCode: appliedPromo?.code,
       discountAmount,
@@ -447,6 +448,8 @@ export const BookingStep1Page: React.FC = () => {
                     src={roomType.image}
                     alt={roomType.name}
                     className="w-16 h-14 rounded-lg object-cover border border-slate-200 shrink-0"
+                    loading="lazy"
+                    decoding="async"
                   />
                   <div>
                     <h3 className="text-sm font-bold text-[#0F172A]">{roomType.name}</h3>
@@ -937,6 +940,8 @@ export const BookingStep1Page: React.FC = () => {
                 src={roomType.image}
                 alt={roomType.name}
                 className="w-24 h-20 rounded-xl object-cover shrink-0 border border-slate-200 shadow-2xs"
+                loading="lazy"
+                decoding="async"
               />
               <div>
                 <span className="text-[11px] font-extrabold text-[#1F5AA6] bg-blue-50 px-1.5 py-0.5 rounded">

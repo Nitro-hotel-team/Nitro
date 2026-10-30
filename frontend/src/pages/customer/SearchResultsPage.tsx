@@ -42,7 +42,7 @@ import { Button } from '../../components/common/Button';
 import { DateRangePicker } from '../../components/common/DateRangePicker';
 import { GuestCounter } from '../../components/common/GuestCounter';
 import { RoomCard } from '../../components/common/RoomCard';
-import { EmptyState, Skeleton } from '../../components/common/StateViews';
+import { EmptyState, RoomCardSkeleton, Skeleton } from '../../components/common/StateViews';
 import { useApp } from '../../context/AppContext';
 import { roomService } from '../../services/api';
 import { RoomType } from '../../types';
@@ -60,7 +60,8 @@ export const SearchResultsPage: React.FC = () => {
   const checkOutParam =
     searchParams.get('checkOut') ||
     new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10);
-  const adultsParam = parseInt(searchParams.get('adults') || '2', 10);
+  const guestsParam = parseInt(searchParams.get('guests') || '0', 10);
+  const adultsParam = parseInt(searchParams.get('adults') || (guestsParam > 0 ? String(guestsParam) : '2'), 10);
   const childrenParam = parseInt(searchParams.get('children') || '0', 10);
   const roomsParam = parseInt(searchParams.get('rooms') || '1', 10);
 
@@ -608,8 +609,8 @@ export const SearchResultsPage: React.FC = () => {
         <div className="lg:col-span-3 space-y-4">
           {loading ? (
             <div className="space-y-4">
-              <Skeleton className="h-64 w-full rounded-2xl" />
-              <Skeleton className="h-64 w-full rounded-2xl" />
+              <RoomCardSkeleton />
+              <RoomCardSkeleton />
             </div>
           ) : filteredRooms.length > 0 ? (
             <div className="space-y-4">

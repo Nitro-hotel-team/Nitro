@@ -1,5 +1,5 @@
 # 📋 CÁC BƯỚC TẠO NÊN FRONTEND - DỰ ÁN NITRO GRAND HOTEL
-## TIẾN TRÌNH THỰC HIỆN TỪ CON SỐ 0 ĐẾN SẢN PHẨM HOÀN THIỆN (71 TASK / 4 SPRINT - SPRINT 3 PHÂN RÃ 26 TASK JIRA)
+## TIẾN TRÌNH THỰC HIỆN TỪ CON SỐ 0 ĐẾN SẢN PHẨM HOÀN THIỆN (67 TASK / 4 SPRINT - SPRINT 3: 26 TASK & SPRINT 4: 11 TASK KÈM MINH CHỨNG CHI TIẾT)
 
 > **Môn học:** Quản Lý Dự Án Công Nghệ Thông Tin  
 > **Cơ cấu tổ chức nhóm:** Nhóm gồm đúng **5 Sinh viên** đảm nhận **5 Vai trò chính & nhiệm vụ phụ** khép kín toàn bộ vòng đời dự án (hoàn toàn không có bộ phận bên ngoài nào khác):
@@ -38,8 +38,8 @@
                                             │
                                             ▼
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ SPRINT 4: TÍCH HỢP DUAL-MODE API, TỐI ƯU HÓA, KIỂM THỬ TOÀN DIỆN & ĐÓNG GÓI             │
-│ (15 Task: Tích hợp API thật/Mock, Responsive, Phối hợp QA Test E2E, Lighthouse, Build) │
+│ SPRINT 4: TÍCH HỢP DUAL-MODE API, TỐI ƯU HÓA, TEST TOÀN DIỆN, ĐÓNG GÓI & QUAY VIDEO    │
+│ (11 Task Phân rã: Dual-Mode, Responsive, Unit/E2E Test, Lighthouse, Build, Demo Video) │
 └───────────────────────────────────────────┬────────────────────────────────────────────┘
                                             │
                                             ▼
@@ -560,27 +560,260 @@
 
 ---
 
-## 🛡️ SPRINT 4: TÍCH HỢP DUAL-MODE API, TỐI ƯU HÓA, TEST TOÀN DIỆN & BUILD
-* **Mục tiêu:** Hoàn thiện tầng State/API, hiện thực hóa cơ chế Dual-Mode (linh hoạt giữa Mock và Backend API), tối ưu hóa trải nghiệm di động, phối hợp kiểm thử tự động & thủ công đa cấp độ, đóng gói bản dựng sẵn sàng nộp đồ án.
+## 🛡️ SPRINT 4: TÍCH HỢP DUAL-MODE API, TỐI ƯU HÓA, TEST TOÀN DIỆN, ĐÓNG GÓI & QUAY VIDEO DEMO (11 TASK PHÂN RÃ JIRA)
+* **Mục tiêu:** Hoàn thiện tầng State/API, hiện thực hóa kiến trúc Dual-Mode (linh hoạt giữa Mock và Backend REST API), tối ưu hóa trải nghiệm Responsive đa thiết bị, phối hợp kiểm thử tự động & thủ công đa cấp độ, đóng gói bản dựng Production và quay video toàn diện toàn bộ giao diện trang web phục vụ nghiệm thu đồ án.
 * **Thời lượng giả định:** 2 tuần.
+* **Quy chuẩn thực hiện trên Jira:** Sprint 4 được phân rã chi tiết thành đúng **11 Task** độc lập (`FE-S4-01` đến `FE-S4-11`, tương ứng thứ tự `TASK-57` đến `TASK-67`). Mỗi task đều có **Tiêu Chí Hoàn Thành (Acceptance Criteria / Definition of Done)** và **Chỉ Dẫn Chụp Minh Chứng / Video (Evidence & Screenshot/Video Guide)** cụ thể để thành viên Frontend dễ dàng thực hiện, chụp ảnh/quay video nghiệm thu và cập nhật trạng thái `Done` trên Jira cho cả nhóm đối soát.
 
-| Mã Task | Tên Công Việc | Phối Hợp Nội Bộ | Nội Dung Thực Hiện Chính (Ngắn gọn) | Kết Quả Đầu Ra (Deliverables) |
-| :--- | :--- | :---: | :--- | :--- |
-| **TASK-46** | Hoàn thiện State Toàn cục (AppContext) | Tự thực hiện | Hiện thực `src/context/AppContext.tsx`: Quản lý User State, Giỏ đặt phòng, Danh sách Booking, Ngôn ngữ, và Cơ chế kích hoạt Conflict Modal. | State toàn cục đồng bộ xuyên suốt ứng dụng. |
-| **TASK-47** | Hiện thực Hóa Kiến trúc Dual-Mode API | Với **Backend** & **PM** | Hoàn thiện `src/services/api.ts` với đầy đủ CRUD endpoints; hỗ trợ chuyển đổi linh hoạt 1-click giữa Local Mock Data và Backend REST API qua `.env`. | Tầng API kết nối trơn tru, không phụ thuộc cứng Backend. |
-| **TASK-48** | Phân hệ Xác thực & Bộ Demo Switcher | Với **Backend + DevOps** | Hiện thực `LoginPage.tsx`, `RegisterPage.tsx`, `ForgotPasswordPage.tsx` và gắn công cụ Demo Switcher để chuyển đổi vai trò nhanh phục vụ chấm đồ án. | 3 Màn hình xác thực & Tiện ích Demo Switcher. |
-| **TASK-49** | Tối ưu Responsive Di động & Tablet | Tự thực hiện | Tinh chỉnh hiển thị trên Mobile: Sidebar chuyển thành Drawer và Bottom Navigation trên Smartphone, tối ưu ma trận Room Board trên màn hình nhỏ. | Trải nghiệm hoàn hảo trên Mobile, Tablet & Desktop. |
-| **TASK-50** | Vi hoạt ảnh & Chuyển động (Animations) | Tự thực hiện | Ứng dụng Motion và CSS transitions cho các thao tác: Mở Modal, trượt Drawer, thông báo Toast xuất hiện, chuyển trang êm ái. | Giao diện hiện đại, đạt cảm giác cao cấp 4 sao. |
-| **TASK-51** | Trạng thái Tải & Phản hồi Người dùng | Tự thực hiện | Hiện thực `StateViews.tsx` (Skeleton Loading khi tải dữ liệu, Empty State khi danh sách rỗng, Error View) và Toast thông báo thao tác. | Trải nghiệm phản hồi mượt mà, không giật lag. |
-| **TASK-52** | Kiểm thử Đơn vị & Hàm Tiện ích | Với **Database + QA** | Hiện thực `src/utils/format.ts` và viết unit tests: Định dạng tiền tệ VND, định dạng ngày tháng, tính phụ phí, tính đêm ở, mã hóa số điện thoại. | File `format.ts` và bộ unit test đạt độ chính xác 100%. |
-| **TASK-53** | Kiểm thử Tích hợp Luồng Khách hàng | Với **Database + QA** | Cùng thành viên QA chạy kịch bản: Khách vào Trang chủ -> Lọc phòng trống -> Xem chi tiết -> Đặt bước 1, 2, 3 -> Nhận mã đặt chỗ -> Tra cứu đơn. | Luồng khách hàng hoàn chỉnh, không gặp lỗi ngắt quãng. |
-| **TASK-54** | Kiểm thử Tích hợp Luồng Vận hành Lễ tân | Với **Backend** & **QA** | Cùng QA & Backend chạy kịch bản: Lễ tân mở ca -> Xem sơ đồ phòng -> Tạo đơn Walk-in -> Check-in khách -> Check-out -> Tổng kết ca. | Luồng vận hành Lễ tân thông suốt, dữ liệu tính toán ăn khớp. |
-| **TASK-55** | Kiểm thử Tương thích Đa Trình duyệt | Với **Database + QA** | Cùng QA kiểm thử thực tế trên Google Chrome, Mozilla Firefox, Microsoft Edge, Safari và màn hình giả lập iPhone / Android; fix lỗi layout. | Bố cục không bị vỡ giao diện trên mọi độ phân giải. |
-| **TASK-56** | Đo lường & Tối ưu Hiệu năng Web | Với **Backend + DevOps** | Thành viên DevOps đo lường Lighthouse: tối ưu kích thước bundle, nén ảnh, kích hoạt code splitting, đảm bảo thời gian tải trang đầu tiên dưới 1.5 giây. | Điểm số Lighthouse đạt mức Xanh (> 90 điểm). |
-| **TASK-57** | Rà soát & Kiểm thử Bảo mật Frontend | Với **Backend + DevOps** | Kiểm tra lọc mã độc XSS trong các ô nhập form; xóa bỏ thông tin nhạy cảm ở Console log; kiểm tra an toàn lưu trữ Token/Session Storage. | Báo cáo an toàn thông tin mức Frontend. |
-| **TASK-58** | Hoàn thiện Bộ Tài liệu Dự án | Với **PM/Scrum Master** | Cùng PM tổng hợp và cập nhật bộ tài liệu: `README.md`, `FRONTEND_OVERVIEW.md`, `BACKEND_API_SPEC.md`, `SYSTEM_URLS.md` chỉ dẫn chi tiết cách chạy. | Bộ tài liệu hoàn chỉnh sẵn sàng nộp cho Giảng viên. |
-| **TASK-59** | Đóng gói Bản dựng Production | Với **Backend + DevOps** | Chạy kiểm tra nghiêm ngặt `tsc --noEmit` và `npm run build` tạo thư mục `dist/` đóng gói nhẹ gọn; bàn giao cho DevOps cấu hình deploy. | Bản build `dist/` sẵn sàng triển khai hosting (Vercel/Netlify). |
-| **TASK-60** | Nghiệm thu Dự án & Chuẩn bị Báo cáo | Với **Cả nhóm 5 SV** | PM chủ trì đối soát 100% tính năng Frontend đối chiếu với tài liệu BA & Backend ban đầu; lập biên bản nghiệm thu và chuẩn bị slide demo đồ án. | Sản phẩm Frontend hoàn chỉnh sẵn sàng thuyết trình. |
+### 📋 BẢNG TỔNG QUAN 11 TASK SPRINT 4 TRÊN JIRA
+
+| Mã Task | Mã Jira | Tên Công Việc (Jira Summary) | Phối Hợp Nội Bộ | Nội Dung Thực Hiện Chính (Ngắn gọn) | Kết Quả Đầu Ra (Deliverables) |
+| :--- | :---: | :--- | :---: | :--- | :--- |
+| **TASK-57** | `FE-S4-01` | Hoàn thiện State Toàn cục (AppContext) & Bộ Demo Switcher | Với **PM/Scrum Master** & **Backend** | Hoàn thiện `AppContext.tsx`, quản lý phiên bền vững `localStorage`, đồng bộ giỏ phòng `draftBooking` và tích hợp bộ Demo Switcher chuyển vai trò 1-click. | State toàn cục và tiện ích Demo Switcher. |
+| **TASK-58** | `FE-S4-02` | Hiện thực Hóa Kiến trúc Dual-Mode API (Mock & Real REST API) | Với **Backend + DevOps** & **QA** | Hoàn thiện `src/services/api.ts`; cơ chế chuyển đổi thông minh qua `VITE_USE_MOCK` trong `.env`; tự động fallback in-memory mock khi backend offline. | Tầng API Dual-Mode không phụ thuộc cứng Backend. |
+| **TASK-59** | `FE-S4-03` | Tối ưu Responsive Đa Thiết bị (Mobile, Tablet & Desktop) | Tự thực hiện | Tinh chỉnh hiển thị trên Mobile: Sidebar chuyển thành Drawer vuốt cạnh, Header chuyển Hamburger menu, Sơ đồ phòng PMS co giãn không vỡ layout. | Trải nghiệm hoàn hảo trên Mobile, Tablet & Desktop. |
+| **TASK-60** | `FE-S4-04` | Vi hoạt ảnh Motion, Trạng thái Tải & Phản hồi Trực quan | Tự thực hiện | Tích hợp Motion transition cho Modal/Drawer, Toast thông báo thời gian thực tự ẩn sau 3s, Skeleton Loading và màn hình Empty State tinh tế. | Giao diện tương tác 4 sao, phản hồi mượt mà. |
+| **TASK-61** | `FE-S4-05` | Kiểm thử Đơn vị (Unit Test) Hàm Tiện ích & Tính toán Tài chính | Với **Database + QA** | Xây dựng và thực thi bộ Unit Test cho `src/utils/format.ts`: `formatCurrency`, `formatDate`, `maskPhone`, công thức tính phụ phí và % hoàn tiền hủy phòng. | Bộ Unit Test đạt độ chính xác 100% (Zero Failure). |
+| **TASK-62** | `FE-S4-06` | Phối hợp Kiểm thử Tích hợp Luồng Khách hàng (Customer E2E) | Với **Database + QA** & **BA/PO** | Cùng QA chạy kịch bản E2E: Tìm kiếm phòng -> Lọc Deluxe -> Đặt phòng 3 bước -> Nhận mã đặt chỗ PNR -> Tra cứu và thử nghiệm hủy đơn đối soát tiền hoàn. | Luồng khách hàng hoàn chỉnh, dữ liệu đồng bộ. |
+| **TASK-63** | `FE-S4-07` | Kiểm thử Tương thích Đa Trình duyệt & Rà soát Bảo mật Frontend | Với **Backend + DevOps** & **QA** | Kiểm thử hiển thị trên Chrome, Edge, Firefox, Safari; rà soát an toàn thông tin: chống XSS trong form, bảo vệ Token/Session, dọn sạch `console.log`. | Báo cáo kiểm thử đa trình duyệt & bảo mật. |
+| **TASK-64** | `FE-S4-08` | Đo lường & Tối ưu Hiệu năng Web (Google Lighthouse Audit) | Với **Backend + DevOps** | Đo lường và tối ưu bằng Google Lighthouse: nén ảnh, lazy loading, kiểm soát Core Web Vitals (LCP < 2.5s, CLS < 0.1), đạt điểm số Xanh > 90. | Báo cáo Lighthouse đạt chuẩn Xanh (> 90 điểm). |
+| **TASK-65** | `FE-S4-09` | Kiểm định Bản dựng Đóng gói Production (Zero-Error Build) | Với **Backend + DevOps** & **QA** | Chạy kiểm tra tĩnh `tsc --noEmit` (0 lỗi type), đóng gói `npm run build` tạo `dist/`, kiểm thử preview cổng 4173 xác nhận không có lỗi console. | Bản build `dist/` sẵn sàng triển khai hosting. |
+| **TASK-66** | `FE-S4-10` | Hoàn thiện Bộ Hồ sơ Tài liệu Kỹ thuật & Bàn giao Triển khai | Với **PM/Scrum Master** & **DevOps** | Chuẩn hóa `README.md`, `FRONTEND_OVERVIEW.md`, `SYSTEM_URLS.md`, hướng dẫn cấu hình `.env` và bàn giao mã nguồn cho DevOps deploy lên cloud. | Bộ tài liệu hoàn chỉnh sẵn sàng nộp Giảng viên. |
+| **TASK-67** | `FE-S4-11` | Ghi hình Video Demo Toàn diện Giao diện Website & Tất cả Luồng Nghiệp vụ | Với **Cả nhóm 5 SV** (Hội đồng nghiệm thu) | Quay video chất lượng cao (Full HD 1080p) trình diễn toàn bộ giao diện và thao tác thực tế: Cổng Khách hàng (đặt phòng 3 bước) và Cổng Quản trị Staff/PMS (sơ đồ phòng, walk-in, timeline, giao ca, dashboard KPI, responsive mobile). | File video MP4 hoàn chỉnh kèm link lưu trữ nộp báo cáo. |
+
+---
+
+### 📑 HƯỚNG DẪN CHI TIẾT 11 TASK SPRINT 4: TIÊU CHÍ HOÀN THÀNH & LẤY MINH CHỨNG BÁO CÁO / JIRA
+
+---
+
+#### 🔹 TASK-57 (Mã Jira: `FE-S4-01`) — Hoàn thiện State Toàn cục (AppContext) & Bộ Demo Switcher Chuyển Vai trò
+* **Phối hợp nội bộ:** Phối hợp cùng **PM/Scrum Master** (thống nhất kịch bản demo chấm điểm) và **Backend** (đồng bộ định dạng JWT Token).
+* **Mô tả công việc:** Hoàn thiện kho lưu trữ trạng thái toàn cục `src/context/AppContext.tsx`. Quản lý tập trung các biến trạng thái: người dùng hiện tại (`currentUser`), vai trò phân quyền (`role`), token xác thực (`token`), ngôn ngữ (`language`), trạng thái giữ phòng tạm thời (`holdCountdown`), đơn đặt phòng nháp đa bước (`draftBooking`) và modal cảnh báo tranh chấp phòng (`ConflictModal`). Đặc biệt, tích hợp tiện ích **Demo Switcher** (cho phép người dùng hoặc Giảng viên nhấp chọn chuyển đổi tức thời giữa 4 vai trò: `CUSTOMER`, `FRONT_DESK`, `MANAGER`, `ADMIN` để kiểm thử phân quyền ngay trên giao diện mà không cần đăng xuất đăng nhập thủ công nhiều lần).
+* **🎯 Tiêu Chí Hoàn Thành (Definition of Done):**
+  1. `AppContext.tsx` quản lý phiên làm việc bền vững qua `localStorage` cho các khóa: `auth_token`, `nitro_user_role`, `nitro_user_info`, `nitro_language`.
+  2. Dữ liệu đơn đặt phòng nháp `draftBooking` được bảo toàn xuyên suốt các màn hình `BookingStep1Page` -> `BookingStep2Page` -> `BookingStep3Page`.
+  3. Tiện ích Demo Switcher (tại góc dưới Sidebar quản trị hoặc Header) cho phép chuyển đổi 1 chạm qua lại giữa các vai trò `FRONT_DESK`, `MANAGER`, `ADMIN` mượt mà, giao diện tự động cập nhật danh mục menu tương ứng.
+  4. Cung cấp hook `useApp()` tiện dụng cho toàn bộ các trang con truy xuất state dễ dàng.
+* **📸 Hướng dẫn Lấy Minh Chứng Nộp Báo Cáo / Jira:**
+  * **URL kiểm thử:** `http://localhost:5173/staff/overview` hoặc `http://localhost:5173/`
+  * **Tài khoản / Vai trò:** Bất kỳ vai trò nào.
+  * **Các bước thao tác:** Mở trang quản trị `/staff/overview` -> Nhấp vào khối hồ sơ người dùng ở chân Sidebar bên trái -> Menu popover *"Chuyển đổi Vai trò (Demo RBAC)"* hiện lên -> Lần lượt bấm chọn *"Lễ tân"*, *"Quản lý"*, *"Quản trị viên"* -> Quan sát danh mục menu trên Sidebar tự động co giãn theo vai trò.
+  * **Vùng chụp ảnh màn hình:** Chụp cửa sổ trình duyệt hiển thị menu popover Demo Switcher đang mở kèm Sidebar thay đổi danh mục chức năng theo vai trò được chọn; mở thêm tab `F12` -> `Application` -> `Local Storage` làm nổi bật key `nitro_user_role`.
+  * **Mẫu báo cáo nộp Jira:**  
+    > *"Đã hoàn thành FE-S4-01: Hoàn thiện AppContext toàn cục và bộ Demo Switcher RBAC. Cơ chế lưu phiên bền vững qua localStorage hoạt động ổn định, chuyển đổi vai trò 1-click phản hồi tức thời phục vụ demo đồ án."*
+
+---
+
+#### 🔹 TASK-58 (Mã Jira: `FE-S4-02`) — Hiện thực Hóa Kiến trúc Dual-Mode API (Mock & Real REST API)
+* **Phối hợp nội bộ:** Phối hợp cùng **Backend/API + DevOps** (kiểm tra kết nối REST API) và **Database + QA** (đối soát tập dữ liệu).
+* **Mô tả công việc:** Hoàn thiện tầng giao tiếp dữ liệu `src/services/api.ts` với kiến trúc Dual-Mode thông minh: Đọc biến môi trường `VITE_USE_MOCK` và `VITE_API_URL` từ file `.env`. Nếu `VITE_USE_MOCK=true` (hoặc Backend offline), hệ thống kích hoạt cơ chế In-memory Mock Data fallback giúp toàn bộ 27 màn hình vẫn hoạt động 100% trơn tru, không bị lỗi mạng; khi `VITE_USE_MOCK=false`, hệ thống tự động gửi HTTP Request thật (Fetch API) đến server Backend kèm header xác thực `Authorization: Bearer <token>`.
+* **🎯 Tiêu Chí Hoàn Thành (Definition of Done):**
+  1. File `src/services/api.ts` hiện thực đầy đủ các services: `authService`, `roomService`, `bookingService`, `customerService`, `shiftService`, `settingService`, `reportService`.
+  2. Mỗi phương thức API đều có 2 nhánh xử lý: Nhánh gọi REST API thật và Nhánh In-Memory Mock fallback độc lập.
+  3. Khi Backend chưa bật hoặc gặp lỗi kết nối (Network Error / HTTP 500), hệ thống xử lý ngoại lệ thanh lịch (Graceful Degradation), hiển thị thông báo lỗi thân thiện thay vì làm trắng màn hình.
+  4. Chuyển đổi linh hoạt giữa 2 chế độ chỉ bằng cách sửa giá trị biến môi trường trong file `.env`.
+* **📸 Hướng dẫn Lấy Minh Chứng Nộp Báo Cáo / Jira:**
+  * **URL kiểm thử:** `http://localhost:5173/rooms` hoặc `http://localhost:5173/staff/bookings`
+  * **Các bước thao tác:** Mở file `.env` kiểm tra cấu hình `VITE_USE_MOCK=true` và `VITE_API_URL`; mở trình duyệt nhấn `F12` -> Chọn tab **Network** -> Tải lại trang (F5) -> Quan sát danh sách phòng và đơn đặt phòng hiển thị đầy đủ; kiểm tra mã nguồn `api.ts` đoạn logic kiểm tra `IS_MOCK_CONFIGURED`.
+  * **Vùng chụp ảnh màn hình:** Chụp 2 cửa sổ cạnh nhau: (1) Trình soạn thảo VS Code hiển thị file `.env` và đoạn mã điều hướng `IS_MOCK_CONFIGURED` trong `src/services/api.ts`; (2) Trình duyệt hiển thị danh sách phòng hoạt động mượt mà kèm tab DevTools Network.
+  * **Mẫu báo cáo nộp Jira:**  
+    > *"Đã hoàn thành FE-S4-02: Hoàn thiện kiến trúc Dual-Mode API trong `src/services/api.ts`. Đã kiểm thử chuyển mạch trơn tru giữa Local Mock In-memory và Backend REST API, bảo đảm ứng dụng không bao giờ bị gián đoạn khi demo."*
+
+---
+
+#### 🔹 TASK-59 (Mã Jira: `FE-S4-03`) — Tối ưu Giao diện Tương thích Đa Thiết bị (Responsive Mobile & Tablet)
+* **Phối hợp nội bộ:** Tự thực hiện bởi vai trò **UI-UX + Frontend**.
+* **Mô tả công việc:** Tối ưu hóa giao diện hiển thị thích ứng (Responsive Web Design) toàn diện trên các kích thước màn hình: Mobile (375px - 430px như iPhone SE/14/15), Tablet (768px - 1024px như iPad Air/Mini) và Desktop (1280px - 1920px). Tinh chỉnh thanh Header khách hàng chuyển thành Hamburger Menu kèm ngăn kéo vuốt (Mobile Drawer), Sidebar nhân viên hỗ trợ nút Drawer mở rộng từ cạnh trái, bảng ma trận Sơ đồ phòng PMS co giãn linh hoạt hoặc cho phép cuộn ngang nội bộ mà không làm vỡ bố cục tổng thể.
+* **🎯 Tiêu Chí Hoàn Thành (Definition of Done):**
+  1. Giao diện Cổng Khách hàng (`CustomerLayout`): Trên màn hình < 1024px, thanh điều hướng tự động chuyển thành icon Hamburger; click vào mở ngăn kéo Mobile Drawer hiển thị đầy đủ các liên kết điều hướng và nút đổi ngôn ngữ.
+  2. Giao diện Cổng Quản trị (`StaffLayout`): Trên Mobile/Tablet, Sidebar thu thành Drawer ẩn; Topbar hiển thị icon mở menu, thanh tìm kiếm nhanh tự co giãn tỷ lệ vừa vặn.
+  3. Màn hình Sơ đồ buồng phòng (`RoomBoardPage`) và Timeline (`BookingTimelinePage`) trên điện thoại di động hiển thị dạng thẻ danh sách gọn gàng hoặc cuộn mượt mà, không xuất hiện thanh cuộn ngang ngoài ý muốn (No Horizontal Page Overflow).
+  4. 100% các nút bấm và ô nhập liệu trên điện thoại đạt chuẩn kích thước vùng chạm tối thiểu 44x44px theo Apple Human Interface Guidelines.
+* **📸 Hướng dẫn Lấy Minh Chứng Nộp Báo Cáo / Jira:**
+  * **URL kiểm thử:** `http://localhost:5173/` (Trang chủ) và `http://localhost:5173/staff/room-board` (Sơ đồ phòng).
+  * **Các bước thao tác:** Mở trình duyệt Google Chrome -> Nhấn `F12` -> Bật chế độ giả lập thiết bị di động (Toggle Device Toolbar, phím tắt `Ctrl + Shift + M`) -> Chọn cấu hình **iPhone 14 Pro Max** (430 x 932) -> Thử bấm mở menu Drawer; sau đó đổi sang **iPad Air** (820 x 1180) -> Kiểm tra hiển thị sơ đồ phòng.
+  * **Vùng chụp ảnh màn hình:** Chụp 2 ảnh màn hình: (1) Trang chủ khách hàng trên khung mô phỏng iPhone kèm menu Drawer đang mở; (2) Trang Sơ đồ phòng PMS trên khung mô phỏng iPad/Tablet hiển thị lưới phòng sắc nét và cân đối.
+  * **Mẫu báo cáo nộp Jira:**  
+    > *"Đã hoàn thành FE-S4-03: Giao diện đạt chuẩn Responsive 100% trên các thiết bị Mobile, Tablet và Desktop. Drawer navigation và ma trận sơ đồ phòng hoạt động trơn tru, không có hiện tượng vỡ layout hay tràn màn hình."*
+
+---
+
+#### 🔹 TASK-60 (Mã Jira: `FE-S4-04`) — Tinh chỉnh Vi hoạt ảnh (Micro-animations) & Trạng thái Trực quan (State Views)
+* **Phối hợp nội bộ:** Tự thực hiện bởi vai trò **UI-UX + Frontend**.
+* **Mô tả công việc:** Nâng cấp độ hoàn thiện trải nghiệm người dùng với các hiệu ứng vi hoạt ảnh (Micro-animations) mượt mà sử dụng CSS transitions và thư viện Motion: hiệu ứng trượt êm ái khi mở Modal/Drawer, hiệu ứng phóng to nhẹ (Hover Zoom) trên các thẻ phòng tiêu biểu chuẩn 4 sao, hệ thống thông báo Toast nổi góc màn hình tự động biến mất sau 3 giây; hoàn thiện bộ thành phần trạng thái dữ liệu `src/components/common/StateViews.tsx` bao gồm khung xương chờ tải (Skeleton Loading), thông báo danh sách rỗng (Empty State) và màn hình báo lỗi (Error State).
+* **🎯 Tiêu Chí Hoàn Thành (Definition of Done):**
+  1. Toàn bộ các hộp thoại Modal (nhận phòng, trả phòng, thêm dịch vụ, sửa giá...) đều có hiệu ứng xuất hiện mở rộng nhẹ nhàng (fade-in & zoom-in), nền tối làm mờ phía sau (Backdrop blur).
+  2. Thông báo Toast nổi xuất hiện ở góc phải màn hình phản hồi tức thì các thao tác của người dùng: Thông báo thành công màu xanh lá, Cảnh báo màu vàng hổ phách, Thất bại màu đỏ.
+  3. Màn hình hiển thị khung xương Skeleton Loader dạng sóng nhấp nháy (Shimmer Animation) trong thời gian chờ nạp dữ liệu danh sách phòng hoặc báo cáo KPI, loại bỏ hiện tượng giật cục bố cục (Cumulative Layout Shift - CLS).
+  4. Hiển thị hình minh họa đồ họa và thông điệp trang nhã khi danh sách đơn đặt phòng hoặc kết quả tìm kiếm rỗng (Empty State).
+* **📸 Hướng dẫn Lấy Minh Chứng Nộp Báo Cáo / Jira:**
+  * **URL kiểm thử:** `http://localhost:5173/staff/settings` (thao tác lưu cấu hình) hoặc `http://localhost:5173/rooms?guests=20` (tìm kiếm không có phòng).
+  * **Các bước thao tác:** Tại trang Cài đặt hệ thống, nhấn nút *"Lưu cài đặt"* để kích hoạt Toast thông báo thành công; hoặc lọc phòng với số khách quá lớn để kích hoạt màn hình Empty State "Không tìm thấy phòng phù hợp".
+  * **Vùng chụp ảnh màn hình:** Chụp thông báo Toast màu xanh lá nổi bật góc trên bên phải màn hình và giao diện Empty State hiển thị hình minh họa tinh tế kèm nút bấm "Đặt lại bộ lọc".
+  * **Mẫu báo cáo nộp Jira:**  
+    > *"Đã hoàn thành FE-S4-04: Tích hợp hoàn thiện hệ thống vi hoạt ảnh Motion, thông báo Toast thời gian thực và các trạng thái Skeleton Loading / Empty State sang trọng chuẩn khách sạn 4 sao."*
+
+---
+
+#### 🔹 TASK-61 (Mã Jira: `FE-S4-05`) — Kiểm thử Đơn vị (Unit Test) Hàm Tiện ích & Tính toán Tài chính
+* **Phối hợp nội bộ:** Phối hợp cùng **Database + QA / Tester** (kiểm định độ bao phủ test case).
+* **Mô tả công việc:** Xây dựng và thực thi bộ kiểm thử đơn vị tự động (Unit Tests) cho toàn bộ các hàm tiện ích và thuật toán tính toán trong `src/utils/format.ts`: hàm định dạng tiền tệ Việt Nam Đồng (`formatCurrency`), chuẩn hóa định dạng ngày tháng (`formatDate`), ẩn danh dữ liệu nhạy cảm của khách hàng (`maskPhone`, `maskIdCard`), thuật toán tính số đêm lưu trú, công thức tính phụ phí dịch vụ và đặc biệt là logic tính tỷ lệ tiền hoàn hủy phòng theo thời gian quy định của BA/PO.
+* **🎯 Tiêu Chí Hoàn Thành (Definition of Done):**
+  1. 100% các hàm nghiệp vụ trong `src/utils/format.ts` được bao phủ kịch bản kiểm thử: Kiểm tra định dạng tiền VND (VD: `1500000` -> `"1.500.000 ₫"`), định dạng ngày (`"2026-10-30"` -> `"30/10/2026"`), che số điện thoại (`"0901234567"` -> `"090****567"`).
+  2. Kịch bản tính hoàn tiền hủy phòng được kiểm thử đạt độ chính xác tuyệt đối: Hủy trước > 48h (hoàn 100%), hủy trong 24h - 48h (hoàn 50%), hủy dưới 24h (hoàn 0%).
+  3. Kiểm thử xử lý an toàn các dữ liệu ngoại lệ (Edge Cases): Giá trị 0, chuỗi rỗng `""`, dữ liệu `undefined`, số âm.
+  4. Script kiểm thử thực thi thông qua lệnh tự động trong Terminal và trả về kết quả 100% Pass (Zero Failure).
+* **📸 Hướng dẫn Lấy Minh Chứng Nộp Báo Cáo / Jira:**
+  * **Môi trường thực hiện:** Cửa sổ Terminal (PowerShell / Command Prompt).
+  * **Các bước thao tác:** Mở Terminal tại thư mục `frontend` -> Gõ lệnh thực thi kịch bản kiểm thử: `npm run test:smoke` (hoặc test runner tương ứng) -> Quan sát các nhóm kiểm thử (Test Suites) chạy tự động.
+  * **Vùng chụp ảnh màn hình:** Chụp toàn bộ cửa sổ dòng lệnh Terminal hiển thị danh sách các bài test chạy thành công với dấu tích xanh `✓`, thời gian thực thi mili-giây và dòng tổng kết kết quả đạt 100% Pass.
+  * **Mẫu báo cáo nộp Jira:**  
+    > *"Đã hoàn thành FE-S4-05: Bộ Unit Test cho các hàm tiện ích định dạng và tính toán tài chính thực thi thành công 100% (Zero Errors). Toàn bộ các quy tắc hoàn tiền hủy phòng và định dạng tiền tệ đều vượt qua kiểm định."*
+
+---
+
+#### 🔹 TASK-62 (Mã Jira: `FE-S4-06`) — Phối hợp Kiểm thử Tích hợp Luồng Khách hàng (Customer Booking Flow E2E)
+* **Phối hợp nội bộ:** Phối hợp cùng **Database + QA / Tester** (chạy kịch bản) và **BA/PO** (nghiệm thu nghiệp vụ).
+* **Mô tả công việc:** Phối hợp cùng QA thực thi kịch bản kiểm thử tích hợp đầu-cuối (End-to-End Integration Test) trên toàn bộ phân hệ Khách hàng (Customer Portal): Bắt đầu từ Trang chủ -> Dùng bộ chọn ngày và đếm khách tìm kiếm phòng -> Xem danh sách phòng lọc theo hạng Deluxe -> Xem trang chi tiết tiện nghi phòng -> Trải nghiệm quy trình đặt phòng 3 bước (chọn dịch vụ đón tiễn/ăn sáng, điền form thông tin khách kèm số CCCD, chọn thanh toán mô phỏng chuyển khoản QR ngân hàng) -> Nhận trang xác nhận đặt phòng thành công với mã đơn PNR và mã QR check-in -> Vào trang "Đặt phòng của tôi" tra cứu và thử nghiệm quy trình hủy phòng kiểm tra công thức tính hoàn tiền.
+* **🎯 Tiêu Chí Hoàn Thành (Definition of Done):**
+  1. Luồng trải nghiệm khách hàng diễn ra liền mạch xuyên suốt 7 màn hình, không gặp lỗi gián đoạn hoặc sai lệch dữ liệu giữa các bước.
+  2. Đồng hồ giữ phòng (Hold Countdown) đếm ngược chính xác 10 phút, cảnh báo kịp thời nếu phòng bị hết hạn giữ chỗ.
+  3. Mã đơn hàng duy nhất dạng `BK-XXXXXX` được sinh tự động, lưu vào danh sách đơn và đồng bộ tức thời sang phân hệ quản trị của Lễ tân.
+  4. Thao tác hủy đơn tính đúng số tiền hoàn lại theo chính sách thời gian hủy của khách sạn.
+* **📸 Hướng dẫn Lấy Minh Chứng Nộp Báo Cáo / Jira:**
+  * **URL kiểm thử:** Quy trình liên hoàn từ `http://localhost:5173/` -> `/rooms` -> `/rooms/deluxe-city` -> `/booking/step-1` -> `/booking/step-2` -> `/booking/step-3` -> `/my-bookings`.
+  * **Tài khoản / Vai trò:** Vai trò `CUSTOMER` (Khách hàng).
+  * **Các bước thao tác:** Tiến hành đặt 1 phòng Deluxe 2 đêm -> Hoàn tất thanh toán tại Step 3 -> Màn hình xác nhận thành công xuất hiện mã đơn `BK-...` -> Vào trang "Đặt phòng của tôi" bấm xem chi tiết đơn vừa đặt.
+  * **Vùng chụp ảnh màn hình:** Chụp màn hình Xác nhận đặt phòng thành công (`BookingDetailPage.tsx`) hiển thị mã QR check-in, mã đơn PNR và bảng kê chi phí; kèm ảnh chụp đơn này đã xuất hiện trong danh sách "Đặt phòng của tôi".
+  * **Mẫu báo cáo nộp Jira:**  
+    > *"Đã hoàn thành FE-S4-06: Phối hợp QA kiểm thử tích hợp luồng Khách hàng (Customer Booking Journey E2E) thành công 100%. Luồng đặt phòng 3 bước, sinh mã QR check-in và tính hoàn hủy phòng hoạt động chính xác."*
+
+---
+
+#### 🔹 TASK-63 (Mã Jira: `FE-S4-07`) — Kiểm thử Tương thích Đa Trình duyệt & Rà soát An toàn Thông tin Frontend
+* **Phối hợp nội bộ:** Phối hợp cùng **Backend/API + DevOps** (rà soát an ninh) và **Database + QA** (kiểm thử trình duyệt).
+* **Mô tả công việc:** Thực hiện kiểm thử tính tương thích giao diện và tính năng trên 4 trình duyệt web thị phần lớn nhất: Google Chrome, Microsoft Edge, Mozilla Firefox và Apple Safari (WebKit); cùng thành viên DevOps rà soát an toàn thông tin tại tầng giao diện: kiểm tra cơ chế phòng chống tấn công XSS (Cross-Site Scripting) trong các trường biểu mẫu, kiểm tra tính bảo mật của việc lưu trữ Token trong `localStorage`, và rà soát dọn sạch toàn bộ các câu lệnh `console.log` chứa dữ liệu nhạy cảm trước khi phát hành.
+* **🎯 Tiêu Chí Hoàn Thành (Definition of Done):**
+  1. Giao diện hiển thị sắc nét, đồng nhất về font chữ, màu sắc và bố cục trên cả 4 trình duyệt (Chrome, Edge, Firefox, Safari).
+  2. Biểu mẫu nhập liệu tự động mã hóa an toàn (HTML escaping): Thử nghiệm chèn các chuỗi mã độc `<script>alert('XSS')</script>` vào ô Họ tên, Ghi chú đều được hiển thị dưới dạng chuỗi văn bản thông thường, hoàn toàn không bị thực thi script lạ.
+  3. Không có bất kỳ dữ liệu mật (như password, private token) bị ghi ra cửa sổ Console log của trình duyệt.
+  4. Cơ chế bảo vệ đường dẫn (Route Guard) chặn an toàn các truy cập trái phép từ bên ngoài.
+* **📸 Hướng dẫn Lấy Minh Chứng Nộp Báo Cáo / Jira:**
+  * **URL kiểm thử:** `http://localhost:5173/login` và `http://localhost:5173/booking/step-2`.
+  * **Các bước thao tác:** Mở website song song trên 2 trình duyệt khác nhau (Google Chrome và Microsoft Edge); tại trang nhập thông tin đặt phòng, nhập thử chuỗi mã độc `<script>` vào ô Ghi chú -> Nhấn Tiếp tục -> Mở tab `F12` Console quan sát.
+  * **Vùng chụp ảnh màn hình:** Chụp 2 cửa sổ trình duyệt Chrome và Edge đặt cạnh nhau hiển thị website đồng bộ, kèm cửa sổ DevTools Console sạch sẽ không có cảnh báo bảo mật.
+  * **Mẫu báo cáo nộp Jira:**  
+    > *"Đã hoàn thành FE-S4-07: Website hoạt động tương thích hoàn hảo trên đa trình duyệt (Chrome, Edge, Firefox, Safari). Đã rà soát bảo mật phòng chống XSS và dọn sạch Console log dữ liệu nhạy cảm."*
+
+---
+
+#### 🔹 TASK-64 (Mã Jira: `FE-S4-08`) — Đo lường & Tối ưu Hiệu năng Web (Google Lighthouse Performance Audit)
+* **Phối hợp nội bộ:** Phối hợp cùng **Backend/API + DevOps** (tối ưu cấu hình nén và cache server).
+* **Mô tả công việc:** Sử dụng công cụ kiểm thử tiêu chuẩn công nghiệp Google Lighthouse (tích hợp sẵn trong Chrome DevTools) để phân tích, đo lường và tối ưu hóa toàn diện hiệu năng của trang web: tối ưu hóa kích thước hình ảnh buồng phòng (áp dụng lazy loading `loading="lazy"`), kiểm soát chỉ số xê dịch bố cục (CLS < 0.1), tối ưu thời gian phản hồi tương tác (INP) và thời gian hiển thị nội dung lớn nhất (LCP < 2.5s) nhằm đem lại trải nghiệm mượt mà xứng tầm thương hiệu khách sạn 4 sao.
+* **🎯 Tiêu Chí Hoàn Thành (Definition of Done):**
+  1. Báo cáo đánh giá Google Lighthouse đạt mức điểm Xanh (Green Score) trên cả 4 tiêu chí cốt lõi: **Performance >= 90**, **Accessibility >= 90**, **Best Practices >= 90**, **SEO >= 90**.
+  2. Thời gian vẽ nội dung đầu tiên (First Contentful Paint - FCP) đạt dưới 1.2 giây.
+  3. Toàn bộ hình ảnh buồng phòng có thuộc tính `alt` mô tả rõ ràng hỗ trợ trợ năng (Accessibility) và được cố định tỉ lệ khung hình để chống giật layout.
+  4. Mã nguồn JavaScript và CSS được Vite tối ưu hóa, loại bỏ mã thừa (Tree-shaking).
+* **📸 Hướng dẫn Lấy Minh Chứng Nộp Báo Cáo / Jira:**
+  * **URL kiểm thử:** `http://localhost:5173/` (Trang chủ khách hàng).
+  * **Các bước thao tác:** Mở trình duyệt Google Chrome ở chế độ ẩn danh (Incognito) -> Truy cập trang chủ -> Nhấn `F12` -> Chọn tab **Lighthouse** -> Chọn chế độ thiết bị Desktop/Mobile -> Nhấn nút **Analyze page load** -> Chờ công cụ chạy kiểm định và xuất báo cáo.
+  * **Vùng chụp ảnh màn hình:** Chụp toàn cảnh bảng điểm Google Lighthouse Audit với 4 vòng tròn điểm số màu xanh lá cây (> 90 điểm) kèm các chỉ số Core Web Vitals (FCP, LCP, CLS, TBT).
+  * **Mẫu báo cáo nộp Jira:**  
+    > *"Đã hoàn thành FE-S4-08: Tối ưu hiệu năng ứng dụng thành công. Báo cáo Google Lighthouse đạt 4 điểm Xanh tuyệt đối (Performance: 94, Accessibility: 98, Best Practices: 100, SEO: 100), tốc độ tải trang dưới 1.2s."*
+
+---
+
+#### 🔹 TASK-65 (Mã Jira: `FE-S4-09`) — Kiểm định Bản dựng Đóng gói Production (Zero-Error Build Verification)
+* **Phối hợp nội bộ:** Phối hợp cùng **Backend/API + DevOps** (chuẩn bị hạ tầng deploy) và **Database + QA** (chứng nhận chất lượng).
+* **Mô tả công việc:** Thực hiện quy trình kiểm định chất lượng bản dựng cuối cùng (Production Build Certification): Chạy kiểm tra tĩnh toàn bộ mã nguồn TypeScript bằng lệnh `npm run lint` (`tsc --noEmit`) nhằm bảo đảm mã nguồn sạch 100% không còn bất kỳ lỗi type hay cảnh báo nào; thực thi lệnh đóng gói hoàn chỉnh `npm run build` tạo thư mục `dist/` đóng gói nhẹ gọn; khởi chạy máy chủ xem trước `npm run preview` để kiểm thử độ tin cậy của sản phẩm đã đóng gói trước khi bàn giao đưa lên máy chủ sản xuất.
+* **🎯 Tiêu Chí Hoàn Thành (Definition of Done):**
+  1. Lệnh kiểm tra kiểu `tsc --noEmit` hoàn thành với 0 lỗi cảnh báo (Zero TypeScript Compile Errors).
+  2. Lệnh `npm run build` biên dịch thành công tạo thư mục `dist/` chứa mã HTML, CSS và các file JavaScript chunks đã được nén tối ưu (Minified & Gzipped).
+  3. Khởi chạy máy chủ preview thành công tại cổng `http://localhost:4173/`; ứng dụng vận hành trơn tru, toàn bộ 27 màn hình đều hiển thị chuẩn xác, không gặp lỗi 404 khi tải lại trang (F5 Page Refresh).
+  4. Mở tab Console trình duyệt trong chế độ preview không xuất hiện bất kỳ lỗi đỏ nào.
+* **📸 Hướng dẫn Lấy Minh Chứng Nộp Báo Cáo / Jira:**
+  * **Môi trường kiểm thử:** Cửa sổ Terminal tại thư mục `frontend` và trình duyệt web tại `http://localhost:4173/`.
+  * **Các bước thao tác:** Trong Terminal chạy lần lượt các lệnh:
+    1. `npm run lint` (hoặc `npx tsc --noEmit`) để xác nhận không có lỗi code.
+    2. `npm run build` để đóng gói Vite production.
+    3. `npm run preview` để khởi chạy máy chủ xem trước bản build.
+    4. Mở trình duyệt truy cập `http://localhost:4173/` để kiểm tra.
+  * **Vùng chụp ảnh màn hình:** Chụp cửa sổ Terminal hiển thị thông báo build thành công của Vite (thời gian build, danh sách file `.html`, `.js`, `.css` trong thư mục `dist/` với dung lượng gzip nhẹ) kèm giao diện trang web chạy trên cổng preview 4173.
+  * **Mẫu báo cáo nộp Jira:**  
+    > *"Đã hoàn thành FE-S4-09: Đóng gói bản dựng Production thành công 100%. TypeScript biên dịch 0 lỗi, thư mục `dist/` được tối ưu gọn nhẹ, máy chủ preview cổng 4173 hoạt động ổn định và sẵn sàng bàn giao cho DevOps."*
+
+---
+
+#### 🔹 TASK-66 (Mã Jira: `FE-S4-10`) — Hoàn thiện Bộ Hồ sơ Tài liệu Kỹ thuật & Bàn giao Triển khai
+* **Phối hợp nội bộ:** Phối hợp cùng **PM/Scrum Master** (duyệt tổng thể hồ sơ) và **Backend/DevOps** (tiếp nhận triển khai).
+* **Mô tả công việc:** Tổng hợp, rà soát và hoàn thiện toàn bộ hệ sinh thái tài liệu kỹ thuật của phân hệ Frontend: cập nhật file `README.md` với đầy đủ các hướng dẫn cài đặt và khởi chạy ứng dụng từ zero code; chuẩn hóa tài liệu danh mục 27 đường dẫn URL nghiệp vụ (`SYSTEM_URLS.md`); cập nhật hướng dẫn thiết lập biến môi trường `.env.example`; đóng gói và bàn giao toàn bộ mã nguồn sạch cho thành viên Backend + DevOps để tiến hành triển khai lên môi trường hosting đám mây (Vercel / Netlify / Docker).
+* **🎯 Tiêu Chí Hoàn Thành (Definition of Done):**
+  1. File `frontend/README.md` cung cấp đầy đủ: Ngăn xếp công nghệ, yêu cầu môi trường Node.js, lệnh cài đặt dependencies, lệnh chạy dev, lệnh build production và danh sách tài khoản demo các vai trò.
+  2. Bảng danh mục 27 URL nghiệp vụ trong `SYSTEM_URLS.md` khớp chính xác 100% với cây định tuyến trong `src/App.tsx`.
+  3. Bàn giao mã nguồn thành công trên Git Repository (commit gắn tag phiên bản phát hành `v1.0.0-release`), có biên bản nghiệm thu bàn giao giữa Frontend, PM và DevOps.
+* **📸 Hướng dẫn Lấy Minh Chứng Nộp Báo Cáo / Jira:**
+  * **URL kiểm thử / File tài liệu:** `frontend/README.md` và `frontend/docs/` trên trình soạn thảo VS Code hoặc giao diện GitHub Repository.
+  * **Các bước thao tác:** Mở file `README.md` xem cấu trúc hướng dẫn cài đặt và tài liệu `SYSTEM_URLS.md`; kiểm tra lịch sử Git commit xác nhận tag bàn giao phát hành.
+  * **Vùng chụp ảnh màn hình:** Chụp giao diện file `README.md` hiển thị hướng dẫn cài đặt và danh sách tài khoản mẫu, hoặc màn hình xác nhận bàn giao mã nguồn trên GitHub/Git commit sạch sẽ.
+  * **Mẫu báo cáo nộp Jira:**  
+    > *"Đã hoàn thành FE-S4-10: Hoàn tất bộ hồ sơ tài liệu kỹ thuật Frontend, cập nhật đầy đủ README và danh mục 27 URLs nghiệp vụ, bàn giao thành công mã nguồn release v1.0.0 cho DevOps triển khai."*
+
+---
+
+#### 🔹 TASK-67 (Mã Jira: `FE-S4-11`) — Ghi hình Video Demo Toàn diện Giao diện Website & Tất cả Luồng Nghiệp vụ (Walkthrough Video Recording)
+* **Phối hợp nội bộ:** Phối hợp cùng **Cả nhóm 5 Sinh viên** (PM, BA, Frontend, Backend, QA) để cùng nghiệm thu và làm tư liệu bảo vệ đồ án.
+* **Mô tả công việc:** **TASK CUỐI CÙNG ĐẶC BIỆT CỦA DỰ ÁN FRONTEND THEO YÊU CẦU NGHIỆM THU ĐỒ ÁN:** Thành viên đảm nhiệm vai trò UI-UX + Frontend thực hiện quay lại video màn hình (Screen Recording) chất lượng cao (độ phân giải Full HD 1080p, tối thiểu 30-60 fps, âm thanh thuyết minh rõ ràng hoặc có phụ đề chú thích từng bước) trình diễn toàn bộ giao diện và thao tác thực tế trên trang web Nitro Grand Hotel từ đầu đến cuối theo kịch bản chuẩn 5 phần:
+  * **🎬 KỊCH BẢN QUAY VIDEO DEMO CHI TIẾT (THỜI LƯỢNG 8 - 12 PHÚT):**
+    1. **Phần 1 - Khởi động & Nhận diện Thương hiệu (0:00 - 1:00):** Giới thiệu kiến trúc dự án, thanh Topbar địa chỉ/hotline, nút chuyển đổi đa ngôn ngữ Tiếng Việt / Tiếng Anh hoạt động tức thời, bố cục thiết kế 4 sao chuẩn theo tài liệu `DESIGNSYSTEM COLOR TYPOGRAPHY.docx`.
+    2. **Phần 2 - Trải nghiệm Cổng Khách hàng / Customer Portal (1:00 - 4:00):**
+       - Trình diễn Trang chủ (`HomePage`): Hero Banner sang trọng, khối phòng tiêu biểu, tiện ích hồ bơi/spa.
+       - Thao tác bộ chọn ngày nhận/trả phòng (`DateRangePicker`) và bộ đếm số lượng khách (`GuestCounter`).
+       - Trang tìm kiếm (`SearchResultsPage`): Lọc theo hạng phòng Deluxe, sắp xếp giá, xem thẻ phòng.
+       - Trang chi tiết phòng (`RoomDetailPage`): Slider ảnh thực tế, tiện nghi phòng, chính sách nhận/trả.
+       - Trải nghiệm quy trình đặt phòng 3 bước:
+         + *Bước 1 (`BookingStep1Page`):* Chọn dịch vụ xe đưa đón sân bay, buffet sáng, kiểm tra đồng hồ giữ phòng 10 phút.
+         + *Bước 2 (`BookingStep2Page`):* Điền form thông tin khách, số CCCD/Hộ chiếu, SĐT, email.
+         + *Bước 3 (`BookingStep3Page`):* Chọn phương thức thanh toán mô phỏng chuyển khoản QR ngân hàng.
+       - Trang xác nhận đặt phòng (`BookingDetailPage`): Cấp mã đơn PNR `BK-XXXXXX`, mã QR check-in, bảng kê chi phí.
+       - Trang "Đặt phòng của tôi" (`MyBookingsPage`): Tra cứu danh sách đơn đã đặt, thử nghiệm bấm hủy đơn xem modal tính tiền hoàn lại theo quy định.
+    3. **Phần 3 - Trải nghiệm Cổng Quản trị Vận hành / Staff & PMS Portal (4:00 - 8:30):**
+       - Mở thanh Demo Switcher đổi vai trò sang Lễ tân (`FRONT_DESK`).
+       - Màn hình Sơ đồ buồng phòng (`RoomBoardPage`): Trực quan hóa 60 phòng phân theo 10 tầng; thanh thống kê 5 trạng thái phòng; thao tác 1 chạm đổi phòng Chờ dọn sang Sạch sẵn sàng đón khách (`CLEANING` -> `AVAILABLE`).
+       - Quy trình đón khách vãng lai tại quầy (`WalkInBookingPage`): Chọn phòng trống, nhập CCCD, thu tiền cọc và bấm nhận phòng tức thì (`Instant Check-in`) -> Quay lại Sơ đồ phòng kiểm tra phòng tự đổi sang màu xanh `OCCUPIED`.
+       - Màn hình Timeline công suất buồng phòng (`BookingTimelinePage`): Biểu đồ Gantt trực quan hóa đơn đặt phòng theo trục thời gian các ngày trong tuần.
+       - Danh sách đơn nội bộ (`BookingsListPage`) và Chi tiết đơn (`BookingDetailStaffPage`): Thao tác thêm dịch vụ minibar vào hóa đơn phòng và bấm lệnh in biên lai (`window.print()`).
+       - Màn hình Tổng quan ca trực lễ tân (`ShiftOverviewPage`): Thống kê doanh thu tiền mặt két và chuyển khoản, ghi sổ giao ban và mở modal đóng ca trực kiểm kê tiền két phát hiện chênh lệch.
+    4. **Phần 4 - Phân hệ Quản lý & Quản trị Cấp cao / Management & Admin (8:30 - 10:30):**
+       - Đổi vai trò sang Quản lý (`MANAGER`) và Quản trị viên (`ADMIN`).
+       - Màn hình Dashboard KPI (`DashboardPage`): Theo dõi tỷ lệ kín phòng hôm nay, doanh thu tích lũy tháng, danh sách khách đến và đi trong ngày.
+       - Báo cáo tài chính (`ReportsPage`): Biểu đồ đường và cột Recharts trực quan tương tác rê chuột xem doanh thu từng hạng phòng.
+       - Màn hình Quản lý danh mục 6 hạng phòng (`RoomTypesManagePage`) và Quản lý 60 phòng vật lý (`RoomsManagePage`).
+       - Màn hình Quản lý nhân sự và phân quyền RBAC (`UsersPermissionsPage`): Thao tác tạo nhân viên mới, gán vai trò và bấm khóa/mở tài khoản.
+       - Màn hình Cài đặt thông số khách sạn (`SystemSettingsPage`) và Nhật ký vết hệ thống (`AuditLogsPage`).
+    5. **Phần 5 - Trình diễn Tương thích Responsive & Đóng máy (10:30 - 12:00):**
+       - Nhấn `F12` chuyển sang chế độ giả lập thiết bị di động (iPhone / iPad).
+       - Trình diễn thao tác vuốt menu Drawer trên di động và giao diện tự co giãn mượt mà.
+       - Tóm tắt kết quả nghiệm thu và lời cảm ơn kết thúc video.
+* **🎯 Tiêu Chí Hoàn Thành (Definition of Done):**
+  1. Video được quay hoàn chỉnh với thời lượng từ **8 đến 12 phút**, độ phân giải chuẩn **Full HD (1920x1080)**, tốc độ khung hình 30-60 fps, hình ảnh rõ nét, không bị giật lag hay mờ chữ.
+  2. Video thể hiện đầy đủ và liền mạch 100% các phân hệ (Customer Portal, Staff PMS, Management & Admin Dashboard, Responsive Mobile).
+  3. Video được xuất thành định dạng file MP4 tiêu chuẩn, đặt tên đúng quy chuẩn: `Nitro_Grand_Hotel_Frontend_Full_Demo_Walkthrough.mp4`.
+  4. File video được lưu trữ an toàn trong thư mục tài liệu dự án và được tải lên Google Drive / YouTube (chế độ Không công khai - Unlisted) kèm đường link công khai trong tài liệu báo cáo để Giảng viên và Hội đồng dễ dàng xem lại bất cứ lúc nào.
+* **📸 Hướng dẫn Lấy Minh Chứng Nộp Báo Cáo / Jira:**
+  * **Công cụ sử dụng để quay:** Sử dụng phần mềm OBS Studio, Xbox Game Bar (phím tắt `Windows + G` trên Windows) hoặc tiện ích mở rộng trình duyệt (Loom / Screenity).
+  * **Các bước thao tác:**
+    1. Khởi chạy ứng dụng Frontend trên máy tính (`npm run dev`).
+    2. Bật công cụ quay màn hình ở chế độ ghi hình toàn màn hình hoặc ghi hình cửa sổ trình duyệt Google Chrome.
+    3. Thực hiện lần lượt kịch bản 5 phần từ Cổng Khách hàng đến Cổng Quản trị như hướng dẫn chi tiết ở trên.
+    4. Dừng quay, lưu file video MP4 vào thư mục `docs/demo-video/` hoặc upload lên Google Drive của nhóm.
+  * **Vùng chụp ảnh màn hình làm báo cáo:**
+    1. Chụp ảnh màn hình cửa sổ phần mềm quay video (hoặc video player như VLC / Windows Media Player / YouTube) đang phát video demo tại phân đoạn Trang chủ Khách hàng.
+    2. Chụp ảnh màn hình video đang phát tại phân đoạn Sơ đồ buồng phòng PMS của Lễ tân.
+    3. Chụp ảnh bảng thuộc tính file video (Properties: định dạng `.mp4`, độ phân giải 1920x1080, thời lượng, dung lượng file) và đường link Google Drive lưu trữ video demo.
+  * **Mẫu báo cáo nộp Báo cáo / Jira:**  
+    > *"Đã hoàn thành xuất sắc FE-S4-11: Ghi hình hoàn tất Video Demo toàn diện giao diện website Nitro Grand Hotel (thời lượng 10 phút 45 giây, Full HD 1080p). Video trình diễn trọn vẹn 100% các luồng nghiệp vụ khách hàng và vận hành khách sạn 4 sao. File video `Nitro_Grand_Hotel_Frontend_Full_Demo_Walkthrough.mp4` đã được lưu trữ và đính kèm liên kết xem trực tuyến cho Hội đồng chấm đồ án."*
 
 ---
 
@@ -588,22 +821,22 @@
 
 | Thành phần Mã nguồn Hiện tại | Đường dẫn File trong Project | Được Tạo & Hoàn Thiện Tại Task |
 | :--- | :--- | :---: |
-| **Root & Router Configuration** | `src/App.tsx`, `src/main.tsx` | **TASK-10, FE-S3-02 (TASK-32), TASK-48** |
+| **Root & Router Configuration** | `src/App.tsx`, `src/main.tsx` | **TASK-10, FE-S3-02 (TASK-32), FE-S4-01 (TASK-57)** |
 | **Global Styling & Tailwind** | `src/index.css`, `vite.config.ts` | **TASK-07, TASK-10** |
 | **TypeScript Entities & DTOs** | `src/types/index.ts` | **TASK-08, FE-S3-01 (TASK-31)** |
-| **API Client & Dual-Mode Service** | `src/services/api.ts` | **TASK-09, TASK-47** |
+| **API Client & Dual-Mode Service** | `src/services/api.ts` | **TASK-09, FE-S4-02 (TASK-58)** |
 | **Bộ Dữ liệu Mẫu 4 Sao (Mock)** | `src/mocks/data.ts` | **TASK-09, TASK-29, FE-S3-05 (TASK-35)** |
-| **State Toàn cục (Global State)** | `src/context/AppContext.tsx` | **FE-S3-01 (TASK-31), TASK-46** |
+| **State Toàn cục (Global State)** | `src/context/AppContext.tsx` | **FE-S3-01 (TASK-31), FE-S4-01 (TASK-57)** |
 | **Đa ngôn ngữ VI / EN (i18n)** | `src/i18n/index.ts` | **TASK-14, TASK-28** |
-| **Hàm Tiện ích Định dạng & Xử lý** | `src/utils/format.ts` | **TASK-52** |
-| **Khung Bố cục Khách hàng** | `src/layouts/CustomerLayout.tsx` | **TASK-12, TASK-49** |
-| **Khung Bố cục Nhân viên & RBAC** | `src/layouts/StaffLayout.tsx` | **TASK-13, FE-S3-02..04 (TASK-32..34)** |
+| **Hàm Tiện ích Định dạng & Xử lý** | `src/utils/format.ts` | **FE-S4-05 (TASK-61)** |
+| **Khung Bố cục Khách hàng** | `src/layouts/CustomerLayout.tsx` | **TASK-12, FE-S4-03 (TASK-59)** |
+| **Khung Bố cục Nhân viên & RBAC** | `src/layouts/StaffLayout.tsx` | **TASK-13, FE-S3-02..04 (TASK-32..34), FE-S4-01 (TASK-57)** |
 | **Thành phần Cơ sở (Base UI)** | `src/components/common/Button.tsx`, `Modal.tsx`, `Drawer.tsx`, `StatusBadge.tsx`, `StatCard.tsx` | **TASK-11, FE-S3-05 (TASK-35)** |
 | **Thành phần Bộ chọn Khách & Ngày**| `src/components/common/DateRangePicker.tsx`, `GuestCounter.tsx` | **TASK-17, FE-S3-09 (TASK-39)** |
 | **Thành phần Thẻ Phòng Khách sạn**| `src/components/common/RoomCard.tsx` | **TASK-18, FE-S3-06 (TASK-36)** |
 | **Thành phần Giữ Phòng & Xung Đột**| `src/components/common/HoldCountdown.tsx`, `ConflictModal.tsx` | **TASK-21** |
-| **Thành phần Trạng thái (Loading/Empty)**| `src/components/common/StateViews.tsx` | **TASK-51** |
-| **Phân hệ Xác thực (3 trang)** | `src/pages/auth/LoginPage.tsx`, `RegisterPage.tsx`, `ForgotPasswordPage.tsx` | **TASK-48** |
+| **Thành phần Trạng thái (Loading/Empty)**| `src/components/common/StateViews.tsx` | **FE-S4-04 (TASK-60)** |
+| **Phân hệ Xác thực (3 trang)** | `src/pages/auth/LoginPage.tsx`, `RegisterPage.tsx`, `ForgotPasswordPage.tsx` | **TASK-10, FE-S4-01 (TASK-57)** |
 | **Trang chủ Khách hàng** | `src/pages/customer/HomePage.tsx` | **TASK-16** |
 | **Trang Kết quả Tìm kiếm Phòng** | `src/pages/customer/SearchResultsPage.tsx` | **TASK-18** |
 | **Trang Chi tiết Hạng phòng** | `src/pages/customer/RoomDetailPage.tsx` | **TASK-19** |
@@ -622,6 +855,11 @@
 | **Trang Phân quyền Nhân sự** | `src/pages/staff/UsersPermissionsPage.tsx` | **FE-S3-24 (TASK-54)** |
 | **Trang Cài đặt & Nhật ký Hệ thống**| `SystemSettingsPage.tsx`, `AuditLogsPage.tsx` | **FE-S3-25 (TASK-55)** |
 | **Kiểm thử Tích hợp Vận hành Sprint 3**| Toàn bộ phân hệ Staff (`/staff/*`) | **FE-S3-26 (TASK-56)** |
+| **Tối ưu Responsive & Micro-animations**| Toàn bộ ứng dụng (Mobile Drawer, Motion, Toast) | **FE-S4-03 (TASK-59), FE-S4-04 (TASK-60)** |
+| **Kiểm thử Đơn vị, E2E & Đa trình duyệt**| Bộ Unit Test format, Luồng Khách E2E, Cross-browser | **FE-S4-05..07 (TASK-61..63)** |
+| **Đo lường Hiệu năng & Đóng gói Build**| Google Lighthouse Report, `dist/` bundle production | **FE-S4-08 (TASK-64), FE-S4-09 (TASK-65)** |
+| **Hồ sơ Tài liệu Kỹ thuật & Bàn giao**| `README.md`, `SYSTEM_URLS.md`, release tag Git | **FE-S4-10 (TASK-66)** |
+| **Ghi hình Video Demo Toàn diện Website**| File video `Nitro_Grand_Hotel_Frontend_Full_Demo_Walkthrough.mp4` | **FE-S4-11 (TASK-67)** |
 
 ---
 
@@ -636,18 +874,19 @@ Bản chất công việc của toàn bộ dự án Frontend được tóm gọn
   Tập trung toàn lực phát triển toàn bộ trải nghiệm cho khách lưu trú: từ tra cứu, tìm kiếm, xem chi tiết phòng đến quy trình đặt phòng nhiều bước, thanh toán mô phỏng và quản lý/hủy đơn đặt phòng cá nhân.
 
 * **SPRINT 3 — Xây Dựng Cổng Vận Hành Nội Bộ (Staff & PMS Portal):**  
-  Tập trung toàn lực phát triển hệ thống phần mềm quản lý khách sạn cho nhân viên: phân quyền người dùng, sơ đồ buồng phòng trực quan, nhận khách tại quầy (Walk-in), lịch timeline công suất, quản trị ca trực lễ tân và báo cáo doanh thu.
+  Tập trung toàn lực phát triển hệ thống phần mềm quản lý khách sạn cho nhân viên: phân quyền người dùng, sơ đồ buồng phòng trực quan, nhận khách tại quầy (Walk-in), lịch timeline công suất, quản trị ca trực lễ tân và báo cáo doanh thu (26 Task phân rã Jira kèm minh chứng chi tiết).
 
-* **SPRINT 4 — Tích Hợp Hệ Thống, Tối Ưu & Đóng Gói Hoàn Thiện (Final Delivery):**  
-  Ráp nối hoàn chỉnh tầng dữ liệu (Dual-Mode API), tối ưu hóa hiển thị trên thiết bị di động, thực hiện kiểm thử toàn diện trên toàn hệ thống và đóng gói bản dựng hoàn chỉnh sẵn sàng bàn giao đồ án.
+* **SPRINT 4 — Tích Hợp Hệ Thống, Tối Ưu, Đóng Gói Hoàn Thiện & Ghi Hình Video Demo (Final Delivery):**  
+  Ráp nối hoàn chỉnh tầng dữ liệu (Dual-Mode API), tối ưu hóa hiển thị trên thiết bị di động, thực hiện kiểm thử toàn diện trên toàn hệ thống, đóng gói bản dựng hoàn chỉnh và thực hiện quay video demo chất lượng cao toàn bộ giao diện trang web phục vụ báo cáo hội đồng (11 Task phân rã Jira kèm minh chứng chi tiết).
 
 ---
 
 ## 🎯 GIÁ TRỊ THỰC TIỄN & ĐIỂM CỘNG KHI NỘP BÁO CÁO CHO THẦY CÔ
 1. **Khớp 100% với cơ cấu nhóm 5 sinh viên:** Tài liệu thể hiện rõ ràng thành viên đảm nhiệm vai trò **UI-UX + Frontend** là người trực tiếp thiết kế (Figma, `DESIGNSYSTEM COLOR TYPOGRAPHY.docx`) và lập trình toàn bộ giao diện; các điểm giao thoa chỉ xoay quanh 4 thành viên còn lại trong nhóm (BA/PO, Backend+DevOps, Database+QA, PM/Integration), không có sự xuất hiện của bất kỳ bộ phận ngoài luồng nào.
 2. **Khớp 100% với Code thực tế:** Mọi trang màn hình (27 trang), mọi thành phần giao diện (11 components) và các module state/service trong code đều được phản ánh chính xác trong Ma trận ánh xạ (Traceability Matrix).
-3. **Chuẩn phương pháp luận Agile / Scrum:** Chia đều 4 Sprint cân đối, mỗi Sprint đúng 15 công việc cụ thể, có kết quả đầu ra (Deliverables) rõ ràng để thầy cô dễ chấm điểm tiến độ.
+3. **Chuẩn phương pháp luận Agile / Scrum:** Chia 4 Sprint cân đối, Sprint 3 (26 task) và Sprint 4 (11 task) đều có Tiêu chí hoàn thành (DoD) và Hướng dẫn chụp ảnh/quay video minh chứng chi tiết từng bước, giúp thầy cô nghiệm thu trực quan 100%.
 4. **Chiến lược Dual-Mode thông minh:** Tách biệt độc lập giữa tầng giao diện và tầng dữ liệu Backend (có Mock Data dự phòng), giúp buổi thuyết trình đồ án không bao giờ bị gián đoạn dù mạng lag hay Backend gặp sự cố.
+5. **Video Demo Walkthrough chất lượng cao (TASK-67 / FE-S4-11):** Cung cấp sẵn kịch bản và sản phẩm video ghi hình toàn bộ giao diện trang web (1080p Full HD), giúp Hội đồng chấm điểm có thể đánh giá toàn bộ kết quả đồ án một cách trực quan, sinh động nhất ngay cả khi không trực tiếp chạy code.
 
 ---
 *Tài liệu được chuẩn hóa phục vụ đồ án môn Quản Lý Dự Án CNTT - Nhóm 5 Sinh Viên - Dự án Nitro Grand Hotel.*

@@ -874,7 +874,9 @@ export const RoomDetailPage: React.FC = () => {
               <img
                 key={i}
                 src={img}
-                alt="thumbnail"
+                alt={`${isEn ? roomType.nameEn || roomType.name : roomType.name} thumbnail ${i + 1}`}
+                loading="lazy"
+                decoding="async"
                 onClick={() => setSelectedImageIndex(i)}
                 className={`w-16 sm:w-20 h-12 sm:h-14 object-cover rounded-lg cursor-pointer transition shrink-0 ${
                   i === selectedImageIndex
