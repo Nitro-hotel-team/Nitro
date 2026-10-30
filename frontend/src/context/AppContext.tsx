@@ -27,6 +27,9 @@ import { useTranslation } from 'react-i18next';
 
 import { authService } from '../services/api';
 import { Booking, User, UserRole } from '../types';
+import { ToastItem, ToastType } from '../components/common/Toast';
+
+export type { ToastItem, ToastType };
 
 interface AppContextType {
   role: UserRole;
@@ -62,6 +65,11 @@ interface AppContextType {
   // Notifications
   unreadNotifications: number;
   markNotificationsRead: () => void;
+
+  // Real-time Toast Notifications (TASK-60)
+  toast: ToastItem | null;
+  showToast: (message: string, type?: ToastType, duration?: number) => void;
+  hideToast: () => void;
 
   // RBAC Permission helper
   hasPermission: (allowedRoles: UserRole[]) => boolean;
@@ -174,6 +182,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isHoldExpired, setIsHoldExpired] = useState<boolean>(false);
   const [showConflictModal, setShowConflictModal] = useState<boolean>(false);
   const [unreadNotifications, setUnreadNotifications] = useState<number>(3);
+
+  // 4b. Hệ thống thông báo nổi Toast thời gian thực (TASK-60: Tự ẩn sau 3s)
+  const [toast, setToast] = useState<ToastItem | null>(null);
+
+  const hideToast = () => {
+    setToast(null);
+  };
+
+  const showToast = (message: string, type: ToastType = 'success', duration = 3000) => {
+    const id = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+    setToast({ id, message, type, duration });
+  };
 
   // 5. Quản lý Đơn đặt phòng nháp lưu bền vững qua localStorage ('nitro_draft_booking')
   const [draftBooking, setDraftBookingState] = useState<Partial<Booking> | null>(() => {
@@ -384,6 +404,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         clearDraftBooking,
         unreadNotifications,
         markNotificationsRead,
+        toast,
+        showToast,
+        hideToast,
         hasPermission: (allowedRoles: UserRole[]) => allowedRoles.includes(role),
       }}
     >

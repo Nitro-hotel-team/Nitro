@@ -33,10 +33,11 @@ import { useTranslation } from 'react-i18next';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { DemoSwitcher } from '../components/common/DemoSwitcher';
+import { ToastContainer } from '../components/common/Toast';
 
 export const CustomerLayout: React.FC = () => {
   const { t } = useTranslation();
-  const { language, setLanguage, currentUser, role, setRole, logout } = useApp();
+  const { language, setLanguage, currentUser, role, setRole, logout, toast, hideToast } = useApp();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -492,6 +493,9 @@ export const CustomerLayout: React.FC = () => {
           </div>
         </div>
       </footer>
+
+      {/* Global Real-time Toast Notification (TASK-60) */}
+      <ToastContainer currentToast={toast} onCloseToast={hideToast} />
     </div>
   );
 };

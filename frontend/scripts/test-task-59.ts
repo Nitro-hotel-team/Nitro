@@ -103,3 +103,4 @@ if (failed === 0) {
   console.log(`${BOLD}${RED}Có bài kiểm tra thất bại!${RESET}\n`);
   process.exit(1);
 }
+

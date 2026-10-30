@@ -47,6 +47,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '../components/common/Button';
 import { ForbiddenView } from '../components/common/ForbiddenView';
 import { DemoSwitcher } from '../components/common/DemoSwitcher';
+import { ToastContainer } from '../components/common/Toast';
 import { useApp } from '../context/AppContext';
 import { UserRole } from '../types';
 import { canAccessRoute } from '../utils/rbac';
@@ -61,7 +62,7 @@ interface MenuItem {
 
 export const StaffLayout: React.FC = () => {
   const { t } = useTranslation();
-  const { role, setRole, logout, currentUser, language, setLanguage, unreadNotifications, markNotificationsRead } = useApp();
+  const { role, setRole, logout, currentUser, language, setLanguage, unreadNotifications, markNotificationsRead, toast, hideToast } = useApp();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -530,6 +531,9 @@ export const StaffLayout: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Global Real-time Toast Notification (TASK-60) */}
+      <ToastContainer currentToast={toast} onCloseToast={hideToast} />
     </div>
   );
 };

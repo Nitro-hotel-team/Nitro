@@ -169,11 +169,11 @@ export const RoomCard: React.FC<RoomCardProps> = ({
 
   return (
     <div
-      className={`bg-white rounded-2xl border border-[#E2E8F0] shadow-sm hover:shadow-xl hover:border-[#1F5AA6]/40 transition-all duration-300 overflow-hidden flex ${
+      className={`bg-white rounded-2xl border border-[#E2E8F0] shadow-sm hover:shadow-2xl hover:-translate-y-1 hover:border-[#1F5AA6]/40 transition-all duration-300 overflow-hidden flex ${
         layout === 'horizontal' ? 'flex-col md:flex-row' : 'flex-col'
       } ${className}`}
     >
-      {/* 1. Photo carousel container */}
+      {/* 1. Photo carousel container (DoD 1: Hover Zoom on 4-star room cards) */}
       <div
         className={`relative overflow-hidden bg-slate-100 shrink-0 group ${
           layout === 'horizontal'
@@ -184,7 +184,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({
         <img
           src={images[currentImgIndex]}
           alt={isEn ? roomType.nameEn || roomType.name : roomType.name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 cursor-pointer"
+          className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105 cursor-pointer"
           onClick={handleViewDetails}
           loading="lazy"
         />

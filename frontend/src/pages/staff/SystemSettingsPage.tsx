@@ -33,6 +33,8 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../../components/common/Button';
+import { Toast } from '../../components/common/Toast';
+import { useApp } from '../../context/AppContext';
 
 export const SystemSettingsPage: React.FC = () => {
   const { t } = useTranslation();
@@ -61,12 +63,15 @@ export const SystemSettingsPage: React.FC = () => {
   const [apiUrl, setApiUrl] = useState(import.meta.env.VITE_API_URL || 'https://api.nitrohotel.vn/v1');
   const [paymentGateway, setPaymentGateway] = useState('VNPAY_SANDBOX');
 
-  // Toast State
+  const { showToast: appShowToast } = useApp();
+
+  // Toast State (TASK-60: Tự ẩn sau 3 giây, góc trên bên phải)
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3500);
+    appShowToast(msg, 'success', 3000);
+    setTimeout(() => setToastMessage(null), 3000);
   };
 
   const handleSave = (e: React.FormEvent) => {
@@ -76,11 +81,15 @@ export const SystemSettingsPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      {/* Toast Notification (DoD 1) */}
+      {/* Toast Notification (DoD 1 & TASK-60: Góc trên bên phải, màu xanh lá 4 sao) */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#0F172A] text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 text-xs font-bold border border-slate-700 animate-in fade-in slide-in-from-bottom-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span>{toastMessage}</span>
+        <div className="fixed top-6 right-6 z-50">
+          <Toast
+            message={toastMessage}
+            type="success"
+            duration={3000}
+            onClose={() => setToastMessage(null)}
+          />
         </div>
       )}
 

@@ -12,7 +12,8 @@
     "test:smoke": "tsx scripts/smoke-test.ts",
     "test:task-57": "tsx scripts/test-task-57.ts",
     "test:task-58": "tsx scripts/test-task-58.ts",
-    "test:task-59": "tsx scripts/test-task-59.ts"
+    "test:task-59": "tsx scripts/test-task-59.ts",
+    "test:task-60": "tsx scripts/test-task-60.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
