@@ -6,7 +6,7 @@
  * ----------------------------------------------------------------------------
  * TỔNG QUAN VÀ NGUYÊN LÝ HOẠT ĐỘNG:
  * - Trang thông báo hoàn tất đặt phòng thành công:
- *     + Hiển thị mã đặt phòng PNR chính thức (ví dụ: NTR-260921-0042) kèm nút Sao chép (Copy to clipboard).
+ *     + Hiển thị mã đặt phòng PNR chính thức (ví dụ: BK-782914) kèm nút Sao chép (Copy to clipboard).
  *     + Mã QR Code check-in nhanh tại quầy lễ tân khách sạn.
  *     + Chi tiết biên nhận thanh toán: Hạng phòng, ngày check-in/out, tên khách, số tiền đã trả.
  *     + Các hành động tiện ích: Xem đơn trong "Đặt phòng của tôi", In xác nhận (Print receipt),
@@ -42,7 +42,7 @@ export const BookingStep3Page: React.FC = () => {
   const [copied, setCopied] = useState(false);
 
   // Fallback booking code if draft is cleared
-  const bookingCode = draftBooking?.bookingCode || 'NTR-260921-0042';
+  const bookingCode = draftBooking?.bookingCode || 'BK-782914';
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(bookingCode);
