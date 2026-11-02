@@ -12,6 +12,7 @@ from app.models.loai_phong import LoaiPhong
 from app.models.hinh_anh_phong import HinhAnhPhong
 from app.models.chi_tiet_dp import ChiTietDatPhong
 from app.models.don_dat_phong import DonDatPhong
+from app.models.khach_hang import KhachHang
 from app.schemas.room import RoomStatusUpdate, RoomCreate, RoomUpdate
 from app.middleware.auth import require_roles
 
@@ -29,10 +30,10 @@ def check_availability(
     check_in_dt = datetime.strptime(checkIn, "%Y-%m-%d")
     check_out_dt = datetime.strptime(checkOut, "%Y-%m-%d")
 
-    # Lấy tất cả phòng thuộc loại phòng (loại trừ phòng đã xóa mềm)
+    # Lấy tất cả phòng thuộc loại phòng (loại trừ phòng đã xóa mềm và bảo trì)
     all_rooms = db.query(Phong).filter(
         Phong.MaLoaiPhong == int(roomTypeId),
-        Phong.TinhTrang != "Xóa mềm"
+        Phong.TinhTrang.notin_(["Xóa mềm", "Bảo trì"])
     ).all()
     total = len(all_rooms)
 
@@ -80,7 +81,23 @@ def get_rooms(
         hinh_anhs = db.query(HinhAnhPhong).filter(HinhAnhPhong.MaPhong == p.MaPhong).order_by(HinhAnhPhong.ThuTu).all()
         images = [ha.HinhAnhURL for ha in hinh_anhs]
         primary_image = next((ha.HinhAnhURL for ha in hinh_anhs if ha.IsPrimary), images[0] if images else None)
-        
+        current_guest_name = None
+        if p.TinhTrang == "Đang sử dụng":
+            active_booking = (
+                db.query(KhachHang.HoTen)
+                .select_from(KhachHang)
+                .join(DonDatPhong, KhachHang.MaKH == DonDatPhong.MaKH)
+                .join(ChiTietDatPhong, DonDatPhong.MaDonDatPhong == ChiTietDatPhong.MaDonDatPhong)
+                .filter(
+                    ChiTietDatPhong.MaPhong == p.MaPhong,
+                    DonDatPhong.TinhTrangDon.notin_(["Đã hủy", "Đã trả phòng"])
+                )
+                .order_by(DonDatPhong.MaDonDatPhong.desc())
+                .first()
+            )
+            if active_booking:
+                current_guest_name = active_booking[0]
+
         result.append({
             "id": str(p.MaPhong),
             "number": p.SoPhong,
@@ -88,7 +105,7 @@ def get_rooms(
             "roomTypeId": str(p.MaLoaiPhong),
             "roomTypeName": loai_phong.TenLoaiPhong if loai_phong else None,
             "status": room_status_to_en(p.TinhTrang) if p.TinhTrang else "AVAILABLE",
-            "currentGuestName": None,
+            "currentGuestName": current_guest_name,
             "note": None,
             "image": primary_image,
             "images": images,
